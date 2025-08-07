@@ -145,15 +145,15 @@ class BackboneGNN(nn.Module):
             self.proj = nn.Linear(self.hidden_dim, self.num_classes)
 
 
-    def encode(self, x, edge_index, edge_attr = None):
+    def encode(self, x, edge_index, edge_attr = None, batch = None):
         h = x
         for l, (conv, bn) in enumerate(zip(self.gnns, self.bns)):
             h = conv(h, edge_index, edge_attr)
-            if l != len(self.layers) - 1:
+            if l != self.n_layers - 1:
                 if self.bn:
                     h = bn(h)
                 h = F.relu(h) 
-        g = self.gmp(h, edge_index.batch)
+        g = self.gmp(h, batch)
         return h, g
 
 
@@ -163,9 +163,9 @@ class BackboneGNN(nn.Module):
         edge_attr = data.xe if hasattr(data, 'xe') else None
 
         if not self.readout_proj:
-            return self.encode(x, edge_index, edge_attr)
+            return self.encode(x, edge_index, edge_attr, data.batch)
         else:
-            h, g = self.encode(x, edge_index, edge_attr)
+            h, g = self.encode(x, edge_index, edge_attr, data.batch)
             h = F.relu(h)
             h = self.proj(h)
             return h, g
@@ -176,7 +176,7 @@ class MLPLayer(nn.Module):
         super().__init__()
         self.lin = nn.Linear(in_dim, out_dim)
         self.ln = nn.LayerNorm(out_dim) if layernorm else nn.Identity()
-        self.act = getattr(F, act.lower(), None)
+        self.act = getattr(F, act.lower(), None) if act is not None else None
         self.dropout = dropout
     
     def forward(self, x):

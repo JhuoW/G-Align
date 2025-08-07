@@ -15,6 +15,7 @@ dirs:
   hydra: ${.temp}hydra/
   output: ${project_root}/output/${model.name}/${uid}/ # For files to be saved, to be initialized
   fingerprint_storage: ${project_root}/fingerprint/  # For fingerprint files
+  checkpoint_dir: ${project_root}/checkpoints/${model.name}/${uid}/  # For model checkpoints
   temp: ${project_root}/temp/working_dir/${uid}/  
 
 res_file: ${dirs.output}seed${seed}_results.json

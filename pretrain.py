@@ -22,6 +22,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 from pytorch_lightning.loggers import WandbLogger
 import os
 import os.path as osp
+import copy
 
 def init_wandb(cfg):
     wandb.init(project="GAlign-Pretrain",
@@ -84,7 +85,12 @@ def main(cfg:DictConfig):
     input_dim = comb_graphs.x.size(-1)
     backbone_gnn = BackboneGNN(in_dim=input_dim, num_classes=L_max, cfg=cfg)
 
-    domain_embedder = DomainEmbedder(backboneGNN=backbone_gnn, cfg=cfg)
+    frozen_backbone = copy.deepcopy(backbone_gnn)
+    for param in frozen_backbone.parameters():
+        param.requires_grad = False
+
+
+    domain_embedder = DomainEmbedder(backboneGNN=frozen_backbone, cfg=cfg)
 
     model = GFM(cfg = cfg,
                 L_max= L_max,
@@ -134,14 +140,24 @@ def main(cfg:DictConfig):
 
     final_model_path = osp.join(cfg.dirs.output, "final_gfm_model.pt")
 
+    # Ensure domain embedder has computed embeddings
+    if not domain_embedder.dm_extractor._cached:
+        logger.info("Computing domain embeddings...")
+        with torch.no_grad():
+            comb_graphs = comb_graphs.to(pretrain_device)
+            e, B = domain_embedder.dm_extractor.compute_fingerprints(comb_graphs)
+
     model_state = {
         'model_state_dict': model.state_dict(),
-        'backbone_state_dict': backbone_gnn.state_dict(),
+        'backbone_state_dict': backbone_gnn.state_dict(),  # Trained backbone
+        'frozen_backbone_state_dict': frozen_backbone.state_dict(),  # Frozen initial backbone θ₀
         'domain_embedder_B': domain_embedder.dm_extractor._B,
         'domain_embedder_theta0': domain_embedder.dm_extractor._theta0,
+        'domain_embedder_e': domain_embedder.dm_extractor._e,
         'config': cfg,
         'L_max': L_max,
         'pretrain_datasets': cfg.pretrain.pretrain_datasets,
+        'pretrain_tasks': pretrain_tasks,
         'combined_graphs_info': {
             'num_nodes': comb_graphs.x.shape[0],
             'num_features': comb_graphs.x.shape[1],

@@ -12,7 +12,7 @@ import os
 from torch_geometric.utils import subgraph
 from model.FiLM import DomainFiLM
 import numpy as np
-
+import ast
 try:
     from sklearn.decomposition import PCA
 except ImportError: 
@@ -59,7 +59,7 @@ class GraphProbContrastLoss(nn.Module):
         h_masked = embed[mask_idx]
         if self.detach_embed:
             h_masked = h_masked.detach()
-        recon = F.linear(h_masked, weight = torch.zeros(feat_dim, h_masked.size(1), device=device))
+        recon = F.linear(h_masked, weight = torch.randn(feat_dim, h_masked.size(1), device=device) * 0.01)
         if edge_index.numel() > 0:
             row, col = edge_index
             deg = torch.bincount(row, minlength=num_nodes).float().clamp(min=1.0)
@@ -80,7 +80,11 @@ class GraphProbContrastLoss(nn.Module):
         return self.recon_weight * recon_loss + self.neigh_weight * neigh_loss
 
 class DomainEmbeddingExtractor:
-    """   Compute PCA fingerprints Embedding e_i for each domain (graph) in a combined Data. """
+    """Compute PCA fingerprints Embedding e_i for each domain (graph) in a combined Data.
+    
+    IMPORTANT: The backbone used here should be a FROZEN copy of the initial parameters θ₀.
+    This ensures consistent domain embeddings across training and inference.
+    """    
     def __init__(self, backbone:nn.Module, cfg):
         """
         backbone: Backbone GNN model to extract node embeddings.
@@ -100,7 +104,12 @@ class DomainEmbeddingExtractor:
                 self.prob_loss = nn.CrossEntropyLoss()
             else:
                 raise ValueError(f"Unknown loss type {cfg.Fingerprint.loss_type} for Fingerprint")
-        ds_names_str = '_'.join(pretrain_ds_names)  # dsname1_dsname2_...
+
+        if isinstance(pretrain_ds_names, list):
+            ds_names_str = '_'.join(pretrain_ds_names) # dsname1_dsname2_...
+        else:
+            ds_names_str = '_'.join(ast.literal_eval(str(pretrain_ds_names)))
+
         fingerprint_dir = os.path.join(cfg.dirs.fingerprint_storage, ds_names_str)
         self.cache_dir = Path(fingerprint_dir)
         if self.cache_dir:
@@ -115,8 +124,11 @@ class DomainEmbeddingExtractor:
         return self.cache_dir/ name if self.cache_dir else None
 
     def _try_load_cache(self):
-        if not self.cache_dir: return
-        if (self._pth('B.pt').exists() and self._pth('PreDomainEmbedding.pt').exists() and self._pth('theta0.pt').exists()):
+        if not self.cache_dir: 
+            return
+        if (self._pth('B.pt').exists() and 
+            self._pth('PreDomainEmbedding.pt').exists() and 
+            self._pth('theta0.pt').exists()):
             self._B = torch.load(self._pth('B.pt'))
             self._e = torch.load(self._pth('PreDomainEmbedding.pt'))
             self._theta0 = torch.load(self._pth('theta0.pt'))
@@ -139,7 +151,8 @@ class DomainEmbeddingExtractor:
         return os.path.join(self.cfg.dirs.fingerprint_storage, pretrain_mode, name)
     
     def _save_cache(self):
-        if not self.cache_dir: return
+        if not self.cache_dir: 
+            return
         torch.save(self._B.cpu(), self._pth('B.pt'))
         torch.save(self._e.cpu(), self._pth('PreDomainEmbedding.pt'))
         torch.save(self._theta0, self._pth('theta0.pt'))
@@ -171,7 +184,7 @@ class DomainEmbeddingExtractor:
         if num_nodes <= max_nodes:
             return x, edge_index, y
         perm = torch.randperm(num_nodes, device=x.device)[:max_nodes]  # sample max_nodes 节点
-        new_idx = torch.full((num_nodes,), dtype=torch.long, device=x.device)
+        new_idx = torch.full((num_nodes,), -1, dtype=torch.long, device=x.device)
         new_idx[perm] = torch.arange(max_nodes, device=x.device)
         row,col = edge_index
         keep_mask = (new_idx[row] >= 0) & (new_idx[col] >= 0)  
@@ -197,14 +210,17 @@ class DomainEmbeddingExtractor:
         x_i = x_i.to(device)
         edge_index_i = edge_index_i.to(device)
         y_i = y_i.to(device)
-        domain_graph = Data(x=x_i, edge_index=edge_index_i, y=y_i, batch=torch.zeros(num_nodes, dtype=torch.long, device=device))
+        domain_graph = Data(x=x_i, 
+                            edge_index=edge_index_i, 
+                            y=y_i, 
+                            batch=torch.zeros(num_nodes, dtype=torch.long, device=device))
         H_i, _ = model(domain_graph)
 
         # compute probe Loss
         if self.cfg.Fingerprint.loss_type == 'ce':
             loss = self.prob_loss(H_i, y_i)
         elif self.cfg.Fingerprint.loss_type == 'contrastive':
-            loss = self.prob_loss(x_i,edge_index_i, H_i)
+            loss = self.prob_loss(domain_graph, H_i)
         else:
             raise ValueError(f"Unknown loss type {self.cfg.Fingerprint.loss_type} for Fingerprint")
         model.zero_grad(set_to_none=True)
@@ -220,24 +236,24 @@ class DomainEmbeddingExtractor:
         M, d_theta = deltas.shape # M = number of parameters
         device = deltas.device
 
-        # d_e = min(self.cfg.Fingerprint.compressed_dim, d_theta, M)
-        d_e = self.cfg.Fingerprint.compressed_dim
+        d_e = min(self.cfg.Fingerprint.compressed_dim, d_theta, M)
+        # d_e = self.cfg.Fingerprint.compressed_dim
 
-        if PCA is not None:
+        if PCA is not None and M > 10:
             pca = PCA(n_components = d_e,
                       whiten=self.cfg.Fingerprint.pca_whiten,
                       svd_solver = 'full' if self.cfg.Fingerprint.pca_svd_full else 'randomized',
                       random_state=self.cfg.Fingerprint.random_state)
 
-            comps = pca.fit_transform(deltas.numpy())
+            comps = pca.fit_transform(deltas.cpu().numpy())
 
             if self.cfg.Fingerprint.l2_normalize:
-                comps /= np.linalg.norm(comps, 1, keepdims=True) + 1e-8
+                comps = comps / (np.linalg.norm(comps, axis=1, keepdims=True) + 1e-8)
 
             B = torch.from_numpy(pca.components_).to(device, dtype = deltas.dtype)  # [d_e, d_theta]
             e = torch.from_numpy(comps).to(device, dtype = deltas.dtype)
             return B,e
-        else:
+        else: # Use torch SVD
             mean = deltas.mean(dim=0, keepdim=True)
             Xc  =deltas - mean  #
             U, S, Vh = torch.lingalg.svd(Xc, full_matrices=False)
@@ -245,6 +261,8 @@ class DomainEmbeddingExtractor:
             e = (U[:, :d_e] * S[:d_e])
             if self.cfg.Fingerprint.pca_whiten:
                 e = e / (S[:d_e] + 1e-8)
+            if self.cfg.Fingerprint.l2_normalize:
+                e = F.normalize(e, p=2, dim=-1)
             return B, e
         
     def compute_fingerprints(self, data):
@@ -282,7 +300,7 @@ class DomainEmbeddingExtractor:
         if self._B is None or self._theta0 is None:
             raise RuntimeError('Compute domain embedding on pre‑training corpus first.')
 
-        device = torch.device(self.cfg.Fingerprint.device)
+        device = self._device()
         self.backbone.load_state_dict(self._theta0)
         self.backbone.to(device).train(False)
         datat_new = data_new.to(device)
@@ -294,11 +312,11 @@ class DomainEmbeddingExtractor:
         if self.cfg.Fingerprint.loss_type == 'ce':
             loss = self.prob_loss(H, y)
         elif self.cfg.Fingerprint.loss_type == 'contrastive':
-            loss = self.prob_loss(x, edge_index_new, H)
+            loss = self.prob_loss(data_new, H)
         self.backbone.zero_grad(set_to_none=True)
         loss.backward()
         grad = flatten_grads(self.backbone, self.cfg.Fingerprint.require_grad_only).detach()
-        delta = -self.cfg.Fingerprint.probe_lr * grad.gpu()
+        delta = -self.cfg.Fingerprint.probe_lr * grad.cpu()
         e_new = (self._B @ delta).to(device)
         if self.cfg.Fingerprint.l2_normalize:
             e_new = F.normalize(e_new, p=2, dim=-1)

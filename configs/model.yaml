@@ -42,7 +42,7 @@ FiLM:
   softplus: true
 
 PAMA:
-  d_attn: 128
+  d_attn: 64
   heads: 1
   dropout: 0.5
 

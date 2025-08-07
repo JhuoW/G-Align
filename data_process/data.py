@@ -423,7 +423,7 @@ class CombineDataset:
 
         pca_x = torch.cat([self.dimension_align(ds) for ds in self.pretrain_ds_list], dim=0) 
 
-        xe    = torch.cat([ds.data.xe for ds in self.pretrain_ds_list], dim=0) if hasattr(self.pretrain_ds_list[0].data, 'xe') else None
+        xe    = torch.cat([ds.data.xe for ds in self.pretrain_ds_list], dim=0).unsqueeze(1) if hasattr(self.pretrain_ds_list[0].data, 'xe') else None
         y = torch.cat([ds.labels + lo for ds, lo in zip(self.pretrain_ds_list, label_offsets)], dim=0)
 
         # shift and concatenate edge_index

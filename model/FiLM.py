@@ -15,7 +15,7 @@ class DomainFiLM(nn.Module):
                                               dropout=self.cfg.FiLM.dropout,
                                               act= 'ReLU',
                                               layernorm=self.cfg.FiLM.layernorm) for i in range(len(dims) - 2)])
-        self.blocks.append(MLPLayer(dims[-2], dims[-1],act=None, dropout=0, layernorm=False))
+        self.blocks.append(MLPLayer(dims[-2], dims[-1], act=None, dropout=0, layernorm=False))
     
     def forward(self, e):
         h = e
