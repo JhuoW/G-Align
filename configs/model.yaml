@@ -1,0 +1,52 @@
+model:
+  name: G-Align
+
+prev_ckpt: null  #  Path of pre-trained checkpoint, null for training from scratch.
+
+# ! Model parameters
+unify_dim: 64
+
+Fingerprint:
+  hidden_dim: 64
+  n_layers: 1
+  conv_type: 'MySAGE'  # Encoder for fingerprint, can be GCN, GAT, SAGE, MySAGE, etc.
+  add_self_loops: true  # for GCN
+  n_heads: 8  # for GAT
+  use_bn: false
+  probe_lr: 1e-2
+  fp_proj_dim: 64  # dimension of domain embedding
+  dropout: 0.5
+  readout_proj: true
+  task: 'node_cls' 
+  device: 'cuda'  # 'cuda' or 'cpu'
+  require_grad_only: true  # Whether to only compute gradients for the parameters that require gradients.
+  compressed_dim: 64
+  pca_whiten: true
+  pca_svd_full: false 
+  l2_normalize: true
+  random_state: 42
+  loss_type: 'ce'  # 'ce' or 'contrastive'
+  contrast_loss:
+    probe_mask_ratio: 0.3
+    probe_recon_weight: 1.0
+    probe_neigh_weight: 1.0
+    detach_embed: true
+    
+
+FiLM:
+  hidden_dim: 64
+  num_layers: 2
+  aligned_feat_dim: 64
+  dropout: 0.5
+  layernorm: false
+  softplus: true
+
+PAMA:
+  d_attn: 128
+  heads: 1
+  dropout: 0.5
+
+
+PTModel:
+  lr: 3e-4
+  weight_decay: 0.001
