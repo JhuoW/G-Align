@@ -25,7 +25,6 @@ seed: 0
 pretrain:
   seed: 42
   gpu: 2
-  debug: false
   pretrain_datasets: ['pubmed', 'arxiv', 'wikics']
   train_tasks: ['pubmed_link','pubmed_node','arxiv','wikics']
   eval_tasks: ['cora_node']
@@ -42,7 +41,9 @@ pretrain:
   log_every_n_steps: 1
   check_val_every_n_epoch: 5
   
-
+wandb:
+  project: "GAlign-Pretrain"
+  debug: false
 
 logging:
   level: info

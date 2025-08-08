@@ -129,9 +129,9 @@ class DomainEmbeddingExtractor:
         if (self._pth('B.pt').exists() and 
             self._pth('PreDomainEmbedding.pt').exists() and 
             self._pth('theta0.pt').exists()):
-            self._B = torch.load(self._pth('B.pt'))
-            self._e = torch.load(self._pth('PreDomainEmbedding.pt'))
-            self._theta0 = torch.load(self._pth('theta0.pt'))
+            self._B = torch.load(self._pth('B.pt'), weights_only=False)
+            self._e = torch.load(self._pth('PreDomainEmbedding.pt'), weights_only=False)
+            self._theta0 = torch.load(self._pth('theta0.pt'), weights_only=False)
             self.backbone.load_state_dict(self._theta0, strict=False)
             self._cached = True
 
@@ -171,13 +171,15 @@ class DomainEmbeddingExtractor:
 
     def _domain_subgraph(self, data:Data, idx: int):
         graph_mask = (data.batch == idx) # extract for nodes in the idx-th graph
+        edge_mask = graph_mask[data.edge_index[0]] & graph_mask[data.edge_index[1]]
         node_idx = graph_mask.nonzero(as_tuple=False).view(-1) # node idx in the combined graph
         if node_idx.numel() == 0:
             raise ValueError(f"Domain {idx} has no nodes")
         edge_index_i, _ = subgraph(node_idx, data.edge_index, relabel_nodes=True) 
         x_i = data.x[graph_mask]
         y_i = data.y[graph_mask]
-        return x_i, edge_index_i, node_idx, y_i, x_i.shape[0]
+        xe_i = data.xe[edge_mask] if hasattr(data, 'xe') else None
+        return x_i, edge_index_i, node_idx, y_i, x_i.shape[0], xe_i
     
     def _sample_nodes(self, x, edge_index, y, max_nodes):
         num_nodes = x.shape[0]
@@ -197,24 +199,29 @@ class DomainEmbeddingExtractor:
     def _probe_grad4domain(self, data, H_all, domain_idx):
         """Compute gradient probe vector Δθ_i for domain_idx."""
         device = self._device()
-        model = copy.deepcopy(self.backbone).to(device)
+        model = self.backbone.to(device)
         model.train(False)
+
+        # for param in model.parameters():
+        #     param.requires_grad = True
 
         if self._theta0 is None:
             self._theta0 = {k:v.clone().cpu() for k, v in self.backbone.state_dict().items()}
 
 
-        x_i, edge_index_i, node_idx, y_i, num_nodes = self._domain_subgraph(data, domain_idx)
-        x_i, edge_index_i, y_i = self._sample_nodes(x_i, edge_index_i, y_i, self.cfg.Fingerprint.max_nodes if self.cfg.Fingerprint.get('max_nodes') is None else num_nodes)
+        x_i, edge_index_i, node_idx, y_i, num_nodes, xe_i = self._domain_subgraph(data, domain_idx)
+        x_i, edge_index_i, y_i = self._sample_nodes(x_i, edge_index_i, y_i, self.cfg.Fingerprint.max_nodes if self.cfg.Fingerprint.get('max_nodes', None) is  not None else num_nodes)
 
         x_i = x_i.to(device)
         edge_index_i = edge_index_i.to(device)
         y_i = y_i.to(device)
+        xe_i = xe_i.to(device) if xe_i is not None else None
         domain_graph = Data(x=x_i, 
                             edge_index=edge_index_i, 
                             y=y_i, 
+                            xe = xe_i,
                             batch=torch.zeros(num_nodes, dtype=torch.long, device=device))
-        H_i, _ = model(domain_graph)
+        H_i, _ = model(domain_graph)  # [N_i, num_classes]
 
         # compute probe Loss
         if self.cfg.Fingerprint.loss_type == 'ce':
@@ -223,12 +230,17 @@ class DomainEmbeddingExtractor:
             loss = self.prob_loss(domain_graph, H_i)
         else:
             raise ValueError(f"Unknown loss type {self.cfg.Fingerprint.loss_type} for Fingerprint")
+        
+        # if not loss.requires_grad:
+        #     raise RuntimeError("Loss does not require gradients. Check model configuration.")
+        loss.requires_grad = True  
         model.zero_grad(set_to_none=True)
         loss.backward()
 
         grad_vec = flatten_grads(model, self.cfg.Fingerprint.require_grad_only).detach()
 
         delta = -self.cfg.Fingerprint.probe_lr * grad_vec  # scale by probe_lr
+        del model
         return delta.cpu()
 
     def _fit_pca(self, deltas):
@@ -236,8 +248,8 @@ class DomainEmbeddingExtractor:
         M, d_theta = deltas.shape # M = number of parameters
         device = deltas.device
 
-        d_e = min(self.cfg.Fingerprint.compressed_dim, d_theta, M)
-        # d_e = self.cfg.Fingerprint.compressed_dim
+        # d_e = min(self.cfg.Fingerprint.compressed_dim, d_theta, M)
+        d_e = self.cfg.Fingerprint.compressed_dim
 
         if PCA is not None and M > 10:
             pca = PCA(n_components = d_e,
@@ -256,15 +268,18 @@ class DomainEmbeddingExtractor:
         else: # Use torch SVD
             mean = deltas.mean(dim=0, keepdim=True)
             Xc  =deltas - mean  #
-            U, S, Vh = torch.lingalg.svd(Xc, full_matrices=False)
+            U, S, Vh = torch.linalg.svd(Xc, full_matrices=False)
             B = Vh[:d_e]
             e = (U[:, :d_e] * S[:d_e])
+            print(B.shape)
+            print(e.shape)
             if self.cfg.Fingerprint.pca_whiten:
                 e = e / (S[:d_e] + 1e-8)
             if self.cfg.Fingerprint.l2_normalize:
                 e = F.normalize(e, p=2, dim=-1)
             return B, e
-        
+
+
     def compute_fingerprints(self, data):
         """Caches results on disk; compute gradient probes per domain; fits PCA to obtain low-dim domain embeddings"""
         if self._cached:
@@ -275,6 +290,7 @@ class DomainEmbeddingExtractor:
         M = int(data.batch.max().item()) + 1 # number of domains (pre-training graphs)
 
         H_all, _  = self._embed_nodes(data) # [N, d] 
+        # print(H_all.shape)
 
         deltas = []
         for i in range(M):  # each domain
@@ -282,8 +298,7 @@ class DomainEmbeddingExtractor:
             deltas.append(delta_i)
         deltas = torch.stack(deltas, dim=0)
         B, e = self._fit_pca(deltas)
-
-        ds_names_str = '_'.join(data.name_dict.values()) # Cora_Citeseer_Pubmed_...
+        ds_names_str = '_'.join(data.name_dict.keys()) # Cora_Citeseer_Pubmed_...
         path_B = self._maybe_cache_path(ds_names_str, "B.pt")
         path_e = self._maybe_cache_path(ds_names_str, "PreDomainEmbedding.pt")
         self._B, self._e= B, e
@@ -323,15 +338,18 @@ class DomainEmbeddingExtractor:
         return e_new
 
 class DomainEmbedder(nn.Module):
-    def __init__(self, backboneGNN, cfg):
+    def __init__(self, backboneGNN, cfg):  # backboneGNN is a frozen GNN model
         super().__init__()
         self.backboneGNN = backboneGNN
         self.cfg = cfg
         self.dm_extractor = DomainEmbeddingExtractor(backboneGNN, cfg)
         self.dm_film = DomainFiLM(cfg)
 
-    def forward(self, data):
+    def forward(self, data, device):
+        
         e, B = self.dm_extractor.compute_fingerprints(data)
+        e = e.to(device)
+        B = B.to(device)
         gamma_f, beta_f, gamma_l, beta_l = self.dm_film(e)
         return e, (gamma_f, beta_f, gamma_l, beta_l), B
     

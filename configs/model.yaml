@@ -18,9 +18,9 @@ Fingerprint:
   dropout: 0.5
   readout_proj: true
   task: 'node_cls' 
-  device: 'cuda'  # 'cuda' or 'cpu'
+  device: null  # Will use the same device as the main training
   require_grad_only: true  # Whether to only compute gradients for the parameters that require gradients.
-  compressed_dim: 64
+  compressed_dim: 64   # pca_compressed dim
   pca_whiten: true
   pca_svd_full: false 
   l2_normalize: true

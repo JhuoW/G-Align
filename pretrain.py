@@ -25,9 +25,9 @@ import os.path as osp
 import copy
 
 def init_wandb(cfg):
-    wandb.init(project="GAlign-Pretrain",
+    wandb.init(project=cfg.wandb.project,
                name = "Pretrain on tasks = {}".format(cfg.pretrain.pretrain_tasks),
-               mode="disabled" if cfg.pretrain.debug else "online",
+               mode="disabled" if cfg.wandb.debug else "online",
                config=OmegaConf.to_object(cfg),)
 
 
@@ -58,7 +58,6 @@ def get_pretrain_data(cfg, pretrain_device):
     # Data(x=[200761, 64], edge_index=[2, 2835972], y=[200761], batch=[200761], ptr=[4],name_dict={pubmed=0,arxiv=1,wikics=2,})
     combined_pretrained_dataset = CombineDataset(cfg=cfg, pretrain_ds_dict = pretrain_dataset_dict, pretrain_device=pretrain_device).combine_graph()
     combined_pretrained_data = combined_pretrained_dataset[0]
-
     return combined_pretrained_data, pretrain_tasks
 
 
@@ -76,21 +75,21 @@ def main(cfg:DictConfig):
     # test on ['cora_node']
     comb_graphs, pretrain_tasks = get_pretrain_data(cfg, pretrain_device)
     cfg.pretrain.pretrain_tasks = pretrain_tasks  # [pubmed_link, pubmed_node, arxiv, wikics]
-    init_wandb(cfg)
+    # init_wandb(cfg)
 
     logger.info("Starting pretraining phase...")
     L_max = int(comb_graphs.y.max().item()) + 1
     logger.info(f"Maximum label count across datasets: {L_max}")
 
     input_dim = comb_graphs.x.size(-1)
-    backbone_gnn = BackboneGNN(in_dim=input_dim, num_classes=L_max, cfg=cfg)
+    backbone_gnn = BackboneGNN(in_dim=input_dim, num_classes=L_max, cfg=cfg).to(pretrain_device)
 
     frozen_backbone = copy.deepcopy(backbone_gnn)
-    for param in frozen_backbone.parameters():
-        param.requires_grad = False
+    # for param in frozen_backbone.parameters():
+    #     param.requires_grad = False
 
 
-    domain_embedder = DomainEmbedder(backboneGNN=frozen_backbone, cfg=cfg)
+    domain_embedder = DomainEmbedder(backboneGNN=frozen_backbone, cfg=cfg).to(pretrain_device)
 
     model = GFM(cfg = cfg,
                 L_max= L_max,
@@ -120,9 +119,11 @@ def main(cfg:DictConfig):
                                             patience=cfg.pretrain.patience,
                                             verbose=True,
                                             mode="min")
-    wandb_logger = WandbLogger(name="GAlign-Pretrain",
-                               project=f"GFM-{cfg.model.name}-{cfg.uid}",
-                               save_dir=cfg.dirs.output) if not cfg.pretrain.debug else None
+    wandb_logger = WandbLogger(project=cfg.wandb.project,
+                               name = "Pretrain on tasks = {}".format(cfg.pretrain.pretrain_tasks),
+                               save_dir=cfg.dirs.temp,
+                               mode="disabled" if cfg.wandb.debug else "online",
+                               config=OmegaConf.to_object(cfg)) if not cfg.wandb.debug else None
     
     trainer = pl.Trainer(max_epochs=cfg.pretrain.pretrain_epochs,
                          accelerator="gpu" if torch.cuda.is_available() and cfg.pretrain.gpu is not None else "cpu",

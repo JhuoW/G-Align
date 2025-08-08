@@ -104,26 +104,46 @@ class GFM(pl.LightningModule):
         self.save_hyperparameters(ignore= ['comb_pretrained_graphs', 'backboneGNN', 'domain_embedder'])
         self.GNNEnc = backboneGNN
         
-        self.frozen_backbone = copy.deepcopy(backboneGNN)
-        for param in self.frozen_backbone.parameters():
-            param.requires_grad = False
+        # self.frozen_backbone = copy.deepcopy(backboneGNN)
+        # for param in self.frozen_backbone.parameters():
+        #     param.requires_grad = False
 
         self.cfg = cfg
         self.comb_pretrained_graphs = comb_pretrained_graphs
         self.de = domain_embedder
-        self.de.dm_extractor.backbone = self.frozen_backbone
+        self.frozen_backbone = self.de.dm_extractor.backbone
 
         self.E_lab = nn.Parameter(torch.randn(L_max, self.cfg.Fingerprint.hidden_dim))
         self.pama = PAMA(cfg)
 
-        self.register_buffer('domain_embeddings', None)
-        self.register_buffer('gamma_f', None)
-        self.register_buffer('beta_f', None)
-        self.register_buffer('gamma_l', None)
-        self.register_buffer('beta_l', None)
-        self.register_buffer('batch', None)
-        self.register_buffer('ptr', None)
+        self.domain_embeddings = None
+        self.gamma_f = None
+        self.beta_f = None
+        self.gamma_l = None
+        self.beta_l = None
+        self.batch = None
+        self.ptr = None
 
+    def setup(self, stage = None):
+        self._compute_domain_embeddings()
+
+    def _compute_domain_embeddings(self):
+        """Compute domain embeddings and FiLM parameters"""
+        if self.domain_embeddings is not None and self.gamma_f is not None:
+            return  # Already computed
+        device = self.device
+        comb_pretrained_graphs = self.comb_pretrained_graphs.to(device)
+        
+        # Ensure frozen backbone is on the correct device
+        self.frozen_backbone = self.frozen_backbone.to(device)
+        
+        # Compute domain embeddings using the FROZEN backbone (for consistency)
+        with torch.no_grad():
+            e, film, B = self.de(comb_pretrained_graphs, device = device)
+            self.domain_embeddings = e
+            self.gamma_f, self.beta_f, self.gamma_l, self.beta_l = film
+            self.batch = comb_pretrained_graphs.batch
+            self.ptr = comb_pretrained_graphs.ptr
 
     def align(self, x, E, gamma_f, beta_f, gamma_l, beta_l, batch):
         z = x * gamma_f[batch] + beta_f[batch]
@@ -131,17 +151,11 @@ class GFM(pl.LightningModule):
         return z, u
 
     def on_train_epoch_start(self):
-        comb_pretrained_graphs = self.comb_pretrained_graphs.to(self.device)
+        if self.domain_embeddings is not None:
+            with torch.no_grad():
+                gamma_f, beta_f, gamma_l, beta_l = self.de.dm_film(self.domain_embeddings)
+                self.gamma_f, self.beta_f, self.gamma_l, self.beta_l = gamma_f, beta_f, gamma_l, beta_l
 
-        with torch.no_grad():
-            e, film, B = self.de(comb_pretrained_graphs)
-            self.gamma_f, self.beta_f, self.gamma_l, self.beta_l = film
-            self.domain_embeddings = e
-            # self.H = self.backboneGNN.encode(comb_pretrained_graphs.x, 
-            #                                  comb_pretrained_graphs.edge_index, 
-            #                                  comb_pretrained_graphs.xe if hasattr(comb_pretrained_graphs, 'xe') else None)[0]
-        self.register_buffer('batch', comb_pretrained_graphs.batch)
-        self.register_buffer('ptr', comb_pretrained_graphs.ptr)
 
     def configure_optimizers(self):
         params = [
@@ -173,7 +187,8 @@ class GFM(pl.LightningModule):
     def training_step(self, batch, batch_idx):         
         losses = []
         accuracies = []
-
+        if self.gamma_f is None:
+            self._compute_domain_embeddings()
         comb_graphs = self.comb_pretrained_graphs.to(self.device)
         H, _ = self.forward_backbone(
             comb_graphs.x, 
@@ -231,6 +246,8 @@ class GFM(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         losses = []
         accuracies = []
+        if self.gamma_f is None:
+            self._compute_domain_embeddings()
         comb_graphs = self.comb_pretrained_graphs.to(self.device)
         with torch.no_grad():
             H, _ = self.forward_backbone(
@@ -245,7 +262,7 @@ class GFM(pl.LightningModule):
             idx_qry = ep['query'].to(self.device)
             gid = ep['graph']
             classes = ep['classes'].to(self.device)
-    
+
             gamma_f, beta_f = self.gamma_f[gid], self.beta_f[gid]
             z_sup = gamma_f * self.H[idx_sup] + beta_f
             z_qry = gamma_f * self.H[idx_qry] + beta_f

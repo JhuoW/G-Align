@@ -1,0 +1,8 @@
+{"time":"2025-08-08T13:19:10.286659935+08:00","level":"INFO","msg":"using version","core version":"0.18.7"}
+{"time":"2025-08-08T13:19:10.286677768+08:00","level":"INFO","msg":"created symlink","path":"/home/zhuowei/My_Proj/G-Align/temp/working_dir/Aug8-13:19-d252fdbc/wandb/run-20250808_131910-lvd2ad09/logs/debug-core.log"}
+{"time":"2025-08-08T13:19:10.497252102+08:00","level":"INFO","msg":"created new stream","id":"lvd2ad09"}
+{"time":"2025-08-08T13:19:10.497319961+08:00","level":"INFO","msg":"stream: started","id":"lvd2ad09"}
+{"time":"2025-08-08T13:19:10.497470174+08:00","level":"INFO","msg":"handler: started","stream_id":"lvd2ad09"}
+{"time":"2025-08-08T13:19:10.497506823+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"lvd2ad09"}
+{"time":"2025-08-08T13:19:10.497761394+08:00","level":"INFO","msg":"sender: started","stream_id":"lvd2ad09"}
+{"time":"2025-08-08T13:19:11.233194686+08:00","level":"INFO","msg":"Starting system monitor"}
