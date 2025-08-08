@@ -266,10 +266,14 @@ class DomainEmbeddingExtractor:
             e = torch.from_numpy(comps).to(device, dtype = deltas.dtype)
             return B,e
         else: # Use torch SVD
-            mean = deltas.mean(dim=0, keepdim=True)
-            Xc  =deltas - mean  #
-            U, S, Vh = torch.linalg.svd(Xc, full_matrices=False)
+            mean = deltas.mean(dim=0, keepdim=True) # [1, d_theta]
+            Xc  =deltas - mean  # (3, d_theta)
+            # U: (3,3)
+            # S: (3,)
+            # Vh: (3, d_theta)
+            U, S, Vh = torch.linalg.svd(Xc, full_matrices=False)  
             B = Vh[:d_e]
+            print(B.shape)
             e = (U[:, :d_e] * S[:d_e])
             print(B.shape)
             print(e.shape)
@@ -296,7 +300,7 @@ class DomainEmbeddingExtractor:
         for i in range(M):  # each domain
             delta_i = self._probe_grad4domain(data, H_all, i)
             deltas.append(delta_i)
-        deltas = torch.stack(deltas, dim=0)
+        deltas = torch.stack(deltas, dim=0) # [3, 11829]
         B, e = self._fit_pca(deltas)
         ds_names_str = '_'.join(data.name_dict.keys()) # Cora_Citeseer_Pubmed_...
         path_B = self._maybe_cache_path(ds_names_str, "B.pt")

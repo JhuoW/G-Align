@@ -8,7 +8,7 @@ dirs:
   checkpoint_dir: ${project_root}/checkpoints/${model.name}/${uid}/
   temp: ${project_root}/temp/working_dir/${uid}/
 res_file: ${dirs.output}seed${seed}_results.json
-uid: Aug8-13:19-d252fdbc
+uid: Aug8-14:45-2d907c0c
 seed: 0
 pretrain:
   seed: 42

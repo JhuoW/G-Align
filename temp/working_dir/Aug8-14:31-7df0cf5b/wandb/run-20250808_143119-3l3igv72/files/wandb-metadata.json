@@ -1,15 +1,15 @@
 {
   "os": "Linux-6.14.0-27-generic-x86_64-with-glibc2.41",
   "python": "3.12.7",
-  "startedAt": "2025-08-08T05:19:10.286349Z",
+  "startedAt": "2025-08-08T06:31:19.070905Z",
   "program": "/home/zhuowei/My_Proj/G-Align/pretrain.py",
   "codePath": "pretrain.py",
   "git": {
     "remote": "git@github.com:JhuoW/G-Align.git",
-    "commit": "1bf1b7a1edfebf161fe92d260b19ffa137028a65"
+    "commit": "a46b5c76eb0d0a72ac9dd331adba502d35325da2"
   },
   "email": "mario931077127@gmail.com",
-  "root": "/home/zhuowei/My_Proj/G-Align/temp/working_dir/Aug8-13:19-d252fdbc/",
+  "root": "/home/zhuowei/My_Proj/G-Align/temp/working_dir/Aug8-14:31-7df0cf5b/",
   "host": "yuhanws01-cil",
   "username": "zhuowei",
   "executable": "/home/zhuowei/anaconda3/bin/python",
@@ -21,7 +21,7 @@
   "disk": {
     "/": {
       "total": "1888574607360",
-      "used": "1678156075008"
+      "used": "1678157787136"
     }
   },
   "memory": {

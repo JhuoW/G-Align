@@ -85,6 +85,8 @@ def main(cfg:DictConfig):
     backbone_gnn = BackboneGNN(in_dim=input_dim, num_classes=L_max, cfg=cfg).to(pretrain_device)
 
     frozen_backbone = copy.deepcopy(backbone_gnn)
+    frozen_backbone.n_layers = 1
+    frozen_backbone.readout_proj = False
     # for param in frozen_backbone.parameters():
     #     param.requires_grad = False
 
