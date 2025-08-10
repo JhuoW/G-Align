@@ -111,7 +111,7 @@ class GFM(pl.LightningModule):
         self.cfg = cfg
         self.comb_pretrained_graphs = comb_pretrained_graphs
         self.de = domain_embedder
-        self.frozen_backbone = self.de.dm_extractor.backbone
+        self.frozen_backbone = self.de.dm_extractor.frozen_backbone
 
         self.E_lab = nn.Parameter(torch.randn(L_max, self.cfg.Fingerprint.hidden_dim))
         self.pama = PAMA(cfg)
@@ -130,7 +130,7 @@ class GFM(pl.LightningModule):
     def _compute_domain_embeddings(self):
         """Compute domain embeddings and FiLM parameters"""
         if self.domain_embeddings is not None and self.gamma_f is not None:
-            return  # Already computed
+            return  
         device = self.device
         comb_pretrained_graphs = self.comb_pretrained_graphs.to(device)
         
@@ -139,7 +139,10 @@ class GFM(pl.LightningModule):
         
         # Compute domain embeddings using the FROZEN backbone (for consistency)
         with torch.no_grad():
-            e, film, B = self.de(comb_pretrained_graphs, device = device)
+            if self.cfg.Fingerprint.DE_type == 'pca':
+                e, film, B = self.de(comb_pretrained_graphs, device = device)
+            elif self.cfg.Fingerprint.DE_type == 'conv':
+                e, film, _ = self.de(comb_pretrained_graphs, device = device)
             self.domain_embeddings = e
             self.gamma_f, self.beta_f, self.gamma_l, self.beta_l = film
             self.batch = comb_pretrained_graphs.batch

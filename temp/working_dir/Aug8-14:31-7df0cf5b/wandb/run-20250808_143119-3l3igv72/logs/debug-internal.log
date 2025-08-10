@@ -1,8 +1,0 @@
-{"time":"2025-08-08T14:31:19.078946682+08:00","level":"INFO","msg":"using version","core version":"0.18.7"}
-{"time":"2025-08-08T14:31:19.078967682+08:00","level":"INFO","msg":"created symlink","path":"/home/zhuowei/My_Proj/G-Align/temp/working_dir/Aug8-14:31-7df0cf5b/wandb/run-20250808_143119-3l3igv72/logs/debug-core.log"}
-{"time":"2025-08-08T14:31:19.190723442+08:00","level":"INFO","msg":"created new stream","id":"3l3igv72"}
-{"time":"2025-08-08T14:31:19.190758358+08:00","level":"INFO","msg":"stream: started","id":"3l3igv72"}
-{"time":"2025-08-08T14:31:19.190807601+08:00","level":"INFO","msg":"handler: started","stream_id":"3l3igv72"}
-{"time":"2025-08-08T14:31:19.19090772+08:00","level":"INFO","msg":"sender: started","stream_id":"3l3igv72"}
-{"time":"2025-08-08T14:31:19.190949739+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"3l3igv72"}
-{"time":"2025-08-08T14:31:19.873156871+08:00","level":"INFO","msg":"Starting system monitor"}

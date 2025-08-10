@@ -23,6 +23,15 @@ from pytorch_lightning.loggers import WandbLogger
 import os
 import os.path as osp
 import copy
+# import argparse
+
+# def get_args_pretrain():
+#     parser = argparse.ArgumentParser('Pretrain')
+
+#     parser.add_argument('--remove_dir', action="store_true", default=False)
+#     args = parser.parse_args()
+#     return args
+
 
 def init_wandb(cfg):
     wandb.init(project=cfg.wandb.project,
@@ -71,6 +80,17 @@ def main(cfg:DictConfig):
     else:
         pretrain_device = torch.device("cpu")
 
+    if cfg.remove_dir:
+        if osp.exists(cfg.dirs.output):
+            logger.info(f"Removing output directory: {cfg.dirs.output}")
+            os.system(f"rm -rf {cfg.dirs.output}")
+        if osp.exists(cfg.dirs.checkpoint_dir):
+            logger.info(f"Removing checkpoint directory: {cfg.dirs.checkpoint_dir}")
+            os.system(f"rm -rf {cfg.dirs.checkpoint_dir}")
+        if osp.exists(cfg.dirs.temp):
+            logger.info(f"Removing temp directory: {cfg.dirs.temp}")
+            os.system(f"rm -rf {cfg.dirs.temp}")
+
     # train on ['pubmed_link','pubmed_node','arxiv','wikics']
     # test on ['cora_node']
     comb_graphs, pretrain_tasks = get_pretrain_data(cfg, pretrain_device)
@@ -91,7 +111,7 @@ def main(cfg:DictConfig):
     #     param.requires_grad = False
 
 
-    domain_embedder = DomainEmbedder(backboneGNN=frozen_backbone, cfg=cfg).to(pretrain_device)
+    domain_embedder = DomainEmbedder(frozen_backboneGNN=frozen_backbone, cfg=cfg).to(pretrain_device)
 
     model = GFM(cfg = cfg,
                 L_max= L_max,
@@ -148,7 +168,10 @@ def main(cfg:DictConfig):
         logger.info("Computing domain embeddings...")
         with torch.no_grad():
             comb_graphs = comb_graphs.to(pretrain_device)
-            e, B = domain_embedder.dm_extractor.compute_fingerprints(comb_graphs)
+            if cfg.Fingerprint.DE_type == 'pca':
+                e, B = domain_embedder.dm_extractor.compute_fingerprints_pca(comb_graphs)
+            elif cfg.Fingerprint.DE_type == 'conv':
+                e, _ = domain_embedder.dm_extractor.compute_fingerprints_conv(comb_graphs)
 
     model_state = {
         'model_state_dict': model.state_dict(),
@@ -169,6 +192,11 @@ def main(cfg:DictConfig):
             'name_dict': comb_graphs.name_dict
         }        
     }
+    if cfg.Fingerprint.DE_type == 'conv':
+        model_state['domain_embedder_projection_state'] = domain_embedder.dm_extractor.projection.state_dict()
+        model_state['domain_embedder_delta_matrices'] = domain_embedder.dm_extractor._delta_matrices
+
+
     torch.save(model_state, final_model_path)
     logger.info(f"Final model saved to: {final_model_path}")
     logger.info("Running final validation...")

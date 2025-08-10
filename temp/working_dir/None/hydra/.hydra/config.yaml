@@ -9,6 +9,7 @@ dirs:
 res_file: ${dirs.output}seed${seed}_results.json
 uid: null
 seed: 0
+remove_dir: true
 pretrain:
   seed: 42
   gpu: 2
@@ -855,11 +856,28 @@ Fingerprint:
   l2_normalize: true
   random_state: 42
   loss_type: ce
+  DE_type: conv
   contrast_loss:
     probe_mask_ratio: 0.3
     probe_recon_weight: 1.0
     probe_neigh_weight: 1.0
     detach_embed: true
+  DE:
+    hidden_channels: 32
+    num_conv_layers: 2
+    kernel_size: 3
+    padding: 1
+    use_maxpool: true
+    pool_size: 2
+    pool_stride: 2
+    adaptive_pool_size: 4
+    mlp_hidden_dims:
+    - 256
+    - 128
+    mlp_dropout: 0.2
+    train_epochs: 100
+    train_lr: 0.001
+    diversity_weight: 0.1
 FiLM:
   hidden_dim: 64
   num_layers: 2

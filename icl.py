@@ -61,9 +61,21 @@ class InContextLearner:
         
         # Initialize domain embedder with cached components
         self.domain_embedder = DomainEmbedder(self.backbone_gnn, self.cfg)
-        self.domain_embedder.dm_extractor._B = self.model_state['domain_embedder_B'].to(self.device)
+        
+        # Load the convolutional projection network state
+        if 'domain_embedder_projection_state' in self.model_state:
+            self.domain_embedder.dm_extractor.projection.load_state_dict(
+                self.model_state['domain_embedder_projection_state']
+            )
+        
+        # Load other cached components
         self.domain_embedder.dm_extractor._theta0 = self.model_state['domain_embedder_theta0']
         self.domain_embedder.dm_extractor._e = self.model_state.get('domain_embedder_e')
+        
+        # Optional: load delta matrices if saved
+        if 'domain_embedder_delta_matrices' in self.model_state:
+            self.domain_embedder.dm_extractor._delta_matrices = self.model_state['domain_embedder_delta_matrices']
+        
         self.domain_embedder.dm_extractor._cached = True
         self.domain_embedder.to(self.device).eval()
         
@@ -88,7 +100,7 @@ class InContextLearner:
         
         # Initialize PAMA for inference
         self.pama = self.model.pama
-        self.E_label = self.model.E_label
+        self.E_label = self.model.E_lab
     
     def load_downstream_graph(self, 
                              dataset_name: str = None, 

@@ -26,11 +26,27 @@ Fingerprint:
   l2_normalize: true
   random_state: 42
   loss_type: 'ce'  # 'ce' or 'contrastive'
+  DE_type: 'conv'  # conv or pca
   contrast_loss:
     probe_mask_ratio: 0.3
     probe_recon_weight: 1.0
     probe_neigh_weight: 1.0
     detach_embed: true
+  # Domain Embedding (DE) Convolutional Projection 
+  DE:
+    hidden_channels: 32  # Initial number of channels in conv layers
+    num_conv_layers: 2  # Number of convolutional layers
+    kernel_size: 3  # Kernel size for conv layers
+    padding: 1  # Padding for conv layers
+    use_maxpool: true  # Whether to use max pooling between conv layers
+    pool_size: 2  # Max pooling kernel size
+    pool_stride: 2  # Max pooling stride
+    adaptive_pool_size: 4  # Size for adaptive average pooling (outputs 4x4)
+    mlp_hidden_dims: [256, 128]  # Hidden dimensions for final MLP
+    mlp_dropout: 0.2  # Dropout rate for MLP
+    train_epochs: 100  # Number of epochs to train projection
+    train_lr: 1e-3  # Learning rate for training projection
+    diversity_weight: 0.1  # Weight for diversity regularization when M < d_e
     
 
 FiLM:

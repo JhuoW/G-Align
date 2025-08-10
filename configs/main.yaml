@@ -21,6 +21,7 @@ dirs:
 res_file: ${dirs.output}seed${seed}_results.json
 uid: null # To be generated in the main program
 seed: 0
+remove_dir: false
 
 pretrain:
   seed: 42
