@@ -120,6 +120,8 @@ class BackboneGNN(nn.Module):
         fp_conf = cfg.Fingerprint
         self.n_layers = fp_conf.n_layers
         self.hidden_dim = fp_conf.hidden_dim
+        self.dropout = fp_conf.dropout if hasattr(fp_conf, 'dropout') else 0.5
+
         self.gmp = global_mean_pool
         self.gnns = nn.ModuleList()
         self.readout_proj = fp_conf.readout_proj
@@ -156,7 +158,8 @@ class BackboneGNN(nn.Module):
             if l != self.n_layers - 1:
                 if self.bn:
                     h = bn(h)
-                h = F.relu(h) 
+                h = F.relu(h)
+                h = F.dropout(h, p=self.dropout, training=self.training) 
         g = self.gmp(h, batch)
         return h, g
 

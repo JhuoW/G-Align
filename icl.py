@@ -477,7 +477,7 @@ def main():
                        help='Path to pretrained model checkpoint')
     parser.add_argument('--dataset', type=str, default='cora',
                        help='Downstream dataset name')
-    parser.add_argument('--k_shot', type=int, default=5,
+    parser.add_argument('--k_shot', type=int, default=3,
                        help = 'Number of support examples per class')
     parser.add_argument('--n_runs', type=int, default=10,
                        help = 'Number of evaluation runs')

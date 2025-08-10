@@ -39,6 +39,9 @@ class PAMA(nn.Module):
         self.W_Q = nn.Linear(self.h, self.d * self.heads)
         self.W_K = nn.Linear(self.h, self.d * self.heads)
         self.W_V = nn.Linear(self.h, self.d * self.heads)
+
+        self.W_O = nn.Linear(self.d * self.heads, self.h)
+
         self.dropout = cfg.PAMA.dropout if hasattr(cfg.PAMA, 'dropout') else 0.5
         self.g = nn.Sequential(
             nn.Linear(self.d * self.heads, self.d),
@@ -47,8 +50,9 @@ class PAMA(nn.Module):
             nn.Linear(self.d, self.h)
         )
         self.dropout_layer = nn.Dropout(self.dropout)
+        self.ln = nn.LayerNorm(self.h)
     
-    def forward_feature(self, z_q, Z_sup):
+    def forward_feature(self, z_q, Z_sup, batch_size):
         batch_size = 1
         mk = Z_sup.shape[0]
         Q_feat = self.W_Q(z_q.unsqueeze(0)).view(batch_size, self.heads, -1)  # [1 x heads x d]
@@ -62,7 +66,7 @@ class PAMA(nn.Module):
         
         # Apply attention to values
         z_out = torch.matmul(attn_weights, V_feat)  # [1 x heads x d]
-        z_out = z_out.view(batch_size, -1).squeeze(0)  # [heads*d]
+        z_out = z_out.view(batch_size, -1)  # [heads*d]
         return z_out
     
     # def forward_label(self, u_q, U_sup):
@@ -83,18 +87,22 @@ class PAMA(nn.Module):
     #     return u_out
     
     def forward(self, z_q, Z_sup, U_sup):
-
+        batch_size = z_q.shape[0] if z_q.dim() > 1 else 1
+        z_q = self.ln(z_q)  
+        Z_sup = self.ln(Z_sup)
         # Feature-side attention
-        z_out = self.forward_feature(z_q, Z_sup)  # [d]
-        
+        z_out = self.forward_feature(z_q, Z_sup, batch_size)  # [d]
+
+        z_out = self.W_O(z_out)  
+
         # Map to label space
         z_hat = self.g(z_out)  # [d]
-        
+        temperature = 0.1 
         # Compute logits against support class label embeddings
         V_label = self.W_V(U_sup)  # [m x d]
         V_label = V_label.view(U_sup.shape[0], self.heads, -1).mean(dim=1) 
-        logits = torch.matmul(z_hat.unsqueeze(0), V_label.transpose(-1, -2)).squeeze(0)
-        return logits
+        logits = torch.matmul(z_hat, V_label.transpose(-1, -2)) / temperature
+        return logits.squeeze(0) if batch_size == 1 else logits
 
 
 
@@ -164,21 +172,25 @@ class GFM(pl.LightningModule):
         params = [
             {'params': self.GNNEnc.parameters(), 'lr': self.cfg.PTModel.lr},  # Backbone IS trained
             {'params': self.pama.parameters(), 'lr': self.cfg.PTModel.lr},
-            {'params': self.E_lab, 'lr': self.cfg.PTModel.lr * 0.1},  # Lower LR for label embeddings
+            {'params': self.E_lab, 'lr': self.cfg.PTModel.lr * 0.5},  # Lower LR for label embeddings
             {'params': self.de.dm_film.parameters(), 'lr': self.cfg.PTModel.lr * 0.5}  # FiLM network
         ]
         optimizer = optim.AdamW(params, weight_decay=self.cfg.PTModel.weight_decay)
-        scheduler = optim.lr_scheduler.CosineAnnealingLR(
-            optimizer, 
-            T_max=self.trainer.max_epochs if hasattr(self, 'trainer') else 100,
-            eta_min=1e-6
-        )        
+        # Add warmup
+        def lr_lambda(epoch):
+            warmup_epochs = 10
+            if epoch < warmup_epochs:
+                return (epoch + 1) / warmup_epochs
+            else:
+                return 0.5 ** ((epoch - warmup_epochs) // 50)  # Decay every 50 epochs
+        
+        scheduler = optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)  
         return {
             'optimizer': optimizer,
-            'lr_scheduler': {
-                'scheduler': scheduler,
-                'interval': 'epoch'
-            }
+            # 'lr_scheduler': {
+            #     'scheduler': scheduler,
+            #     'interval': 'epoch'
+            # }
         }
 
     def forward_backbone(self, x, edge_index, edge_attr=None, batch=None):
@@ -193,12 +205,13 @@ class GFM(pl.LightningModule):
         if self.gamma_f is None:
             self._compute_domain_embeddings()
         comb_graphs = self.comb_pretrained_graphs.to(self.device)
-        H, _ = self.forward_backbone(
-            comb_graphs.x, 
-            comb_graphs.edge_index,
-            comb_graphs.xe if hasattr(comb_graphs, 'xe') else None,
-            comb_graphs.batch
-        )        
+        with torch.set_grad_enabled(True):
+            H, _ = self.forward_backbone(
+                comb_graphs.x, 
+                comb_graphs.edge_index,
+                comb_graphs.xe if hasattr(comb_graphs, 'xe') else None,
+                comb_graphs.batch
+            )        
         for ep in batch:
             idx_sup = ep['support'].to(self.device)
             idx_qry = ep['query'].to(self.device)
@@ -214,6 +227,10 @@ class GFM(pl.LightningModule):
             U_sup_base = self.E_lab[classes]
             U_sup = gamma_l * U_sup_base + beta_l
 
+            # Normalize embeddings for stability
+            z_sup = F.normalize(z_sup, p=2, dim=-1)
+            z_qry = F.normalize(z_qry, p=2, dim=-1)
+            U_sup = F.normalize(U_sup, p=2, dim=-1)
             k = len(idx_sup) // len(classes)
             m = len(classes)
 
@@ -227,7 +244,16 @@ class GFM(pl.LightningModule):
 
                 tgt = torch.tensor(q_class, device=self.device, dtype=torch.long)
 
-                loss_q = F.cross_entropy(logits.unsqueeze(0), tgt.unsqueeze(0))
+                # loss_q = F.cross_entropy(logits.unsqueeze(0), tgt.unsqueeze(0))
+
+                # Add label smoothing
+                label_smoothing = 0.1
+                target = torch.tensor(q_class, device=self.device, dtype=torch.long)
+                loss_q = F.cross_entropy(
+                    logits.unsqueeze(0), 
+                    target.unsqueeze(0),
+                    label_smoothing=label_smoothing
+                )
                 episode_losses.append(loss_q)
 
                 # Track accuracy
