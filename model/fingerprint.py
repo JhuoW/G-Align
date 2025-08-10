@@ -595,6 +595,7 @@ class DomainEmbeddingExtractor:
             loss = self.prob_loss(data_new, H)
         
         self.frozen_backbone.zero_grad(set_to_none=True)
+        loss.requires_grad = True
         loss.backward()
         grad_matrix = None
         for name, param in self.frozen_backbone.named_parameters():

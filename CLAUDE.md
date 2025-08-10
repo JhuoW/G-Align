@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-# Graph Aligner for In-Context Learning2
+# Graph Aligner for In-Context Learning
 
 ## Why not TAG?
 
@@ -73,62 +73,34 @@ where $\mathcal{L}_i$ is the task loss on $G_i \in \mathcal{G}$, and $\eta$ is a
 
 Since every $\theta_i$ for $G_i$ is a nearby point on the loss landscape around $\theta_0$, the vector $\Delta \theta_i=\theta_i-\theta_0 \in \mathbb{R}^{d_\theta}$ captures how graph $G_i$ pulls the shared model to fit its own data. Graphs from similar domains produce similar $\Delta \theta$, and dissimilar domains bend the weights in orthogonal directions. **One step gradient is enough to capture the interactions between the graph and labels, which considers three factors of the graph to fully capture the domain characteristics.** 
 
-Since $\theta = \mathrm{vec}(\mathbf{W}) \in \mathbb{R}^{d_\theta}$  where $d_\theta = d_{in} \cdot d_{out}$,projecting the high-dimensional weight-deltas $\{\Delta \theta\}^M_{i = 1}$ to a compact vector with a projection matrix $\mathbf{B}$, we can get a **domain embedding** $e_i$ as: 
+If we use one-layer GNN with one gradient step to compute domain matrix, we have $\Delta \theta_i \in \mathbb{R}^{d \times d_{c}}$ which can be used to represented the domain of the pre-training graph $G_i$, where $d_c$ is the number of classes, and $d$ is the node feature dimension. Our goal is to learn a projection $r: \mathbb{R}^{d\times d_c} \to \mathbb{R}^{d_e}$ to project the high-dimensional weight-deltas $\{\Delta \theta\}^M_{i = 1}$ to a compact domain embeddings $e_i$ for all $M$ pretraining graphs. We first design a learnable projection that respect matrix structure. To this end, we proposed convolutional projection as:
 
 $$
-e_i=\mathbf{B} \Delta \theta_i \in \mathbb{R}^{d_e}
+e_i = r\left(\Delta \theta_i\right)=\operatorname{MLP}\left(\text { flatten }\left(\operatorname{Conv} 2 \mathrm{D}\left(\Delta \theta_i\right)\right)\right)
 $$
 
-where $d_e \ll d_\theta$. Then we perform layer normalization on $e_i$ to remove scale variation as $e_i \leftarrow \frac{e_i-\mu(e_i)}{\sigma(e_i)}$, where  $\mu$ and $\sigma$ are mean and standard deviation of $e_i$.
+where $\Delta \theta_i$ is treated as a single-channel image, and a 2D convolutions is applied to it to capture local patterns. Then the final MLP maps to $\mathbb{R}^{d_e}$ .
 
-**Metric property of domain embedding** $e_i$. A good $\mathbf{B}\in \mathbb{R}^{d_e \times d_\theta}$ should preserve the geometry (i.e., pair-wise distances) of $\Delta \theta$ set. In other words, a good $\mathbf{B}$ should compress $\Delta \theta$ while preserve the relationships between different $\Delta \theta$:
-
-$$
-\forall i,j: \quad \left\|e_i-e_j\right\|_2 \approx\left\|\Delta \theta_i-\Delta \theta_j\right\|_2
-$$
+To train the above **Domain Embedder**, the key insight is to preserve domain relationships:
 
 $$
-\mathbf{B} = \arg\min_{\mathbf{B}} \sum_{i,j} \mathrm{Distance}(\left\|e_i-e_j\right\|_2, \left\|\Delta \theta_i-\Delta \theta_j\right\|_2)  
+\mathcal{L}_{\text {dist }}=\sum_{i, j}\left|d_{\text {orig }}(i, j)-d_{\text {proj }}(i, j)\right|^2
 $$
 
-We can use PCA-based domain embedding to compress weight deltas into compact domain embeddings. Specifically, we first stack all deltas into a data matrix $\Delta \Theta=\left[\begin{array}{c}
-\left(\Delta \theta_1\right)^{\top} \\
-\vdots \\
-\left(\Delta \theta_M\right)^{\top}
-\end{array}\right] \in \mathbb{R}^{M \times d_\theta}$,  then compute the mean with $\Delta\bar{\theta}=\frac{1}{M} \sum_{i=1}^M \Delta \theta_i$ and centre every row we have $\Delta\tilde{\Theta}=\Delta \Theta-\mathbf{1}_M \bar{\theta}^{\top}$. Define the Gram matrix as: $\mathbf{G} = \frac{1}{M}\Delta\tilde{\Theta}\Delta\tilde{\Theta}^\top \in \mathbb{R}^{M \times M}$ and compute its eigen-decomposition by **truncated** SVD as:
-
-$$
-\mathbf{G} = \mathbf{U} \boldsymbol{\Lambda} \mathbf{U}^\top, \quad \boldsymbol{\Lambda} = \mathrm{diag}(\lambda_1, \cdots, \lambda_r),
-$$
-
-and obtain the right singular vectors $\mathbf{V}=\Delta\tilde{\Theta}^{\top} \mathbf{U} \mathbf{\Lambda}^{-1 / 2} \in \mathbb{R}^{d_\theta \times r}$, which can be used to yield the compact SVD $\Delta\tilde{\Theta} =  \mathbf{U} \boldsymbol{\Lambda}^{\frac{1}{2}}\mathbf{V}^\top$, where $\lambda_1 \geq \cdots \geq \lambda_r>0$ and $r=\operatorname{rank}(\Delta\tilde{\Theta}) \leq \min \left\{M, d_\theta\right\}$. We can choose an intrinsic dimension $d_e \leq r$ (in most cases, $r = M$), and define the projection matrix  $\mathbf{B}$ as:
-
-$$
-\mathbf{B} = (\mathbf{V}_{:d_e})^{\top} \in \mathbb{R}^{d_\theta \times d_e}
-$$
-
-which is the first $d_e$ eigenvectors transposed (with the largest $d_e$ eigenvalues). Since columns of $\mathbf{V}$ are orthonormal, $\mathbf{B}$ is orthonormal as well and $\mathbf{B}\mathbf{B}^\top = \mathbf{I}_{d_e}$.
-
-**Theorem  1**. (Minimum reconstruction error) For any rank-$d_e$ linear map $Q \in \mathbb{R}^{d_e \times d_\theta}$,  if the following inequation holds:
-
-$$
-\sum_{i=1}^M\left\|\Delta \theta_i-Q^{\top} Q \Delta \theta_i\right\|_2^2 \geq \sum_{i=1}^M\left\|\Delta \theta_i-\mathbf{B}^{\top} \mathbf{B} \Delta \theta_i\right\|_2^2
-$$
-
-According to Eckart-Young-Mirsky theorem, PCA (i.e., $\mathbf{B}$) is the unique minimizer of the Frobenius-norm reconstruction error.
+where $d_{\text {orig }}(i, j)=\left\|\Delta \theta_i-\Delta \theta_j\right\|_F$ and $d_{p r o j}(i, j)=\left\|e_i-e_j\right\|_2$. 
 
 ### **1.2 In-Context Domain Embedding**
 
 Run one gradient step on the same model initialization $\theta_0$ using data from $G_{\mathrm{new}}$ with a few labels as prompt for **in-context learning**:
 
 $$
-\Delta\theta^{(1)}_{\mathrm{new}} = \theta_0 - \eta \nabla_\theta \mathcal{L}_{\text {new }}\left(\theta_0\right)
+\theta^{(1)}_{\mathrm{new}} = \theta_0 - \eta \nabla_\theta \mathcal{L}_{\text {new }}\left(\theta_0\right)
 $$
 
 then the domain embedding of new graph is computed as:
 
 $$
-e_{\mathrm{new}} = \mathbf{B}(\theta^{(1)}_{\mathrm{new}}-\theta_0)
+e_{\mathrm{new}} = r(\theta^{(1)}_{\mathrm{new}}-\theta_0)
 $$
 
 ![image.png](image%203.png)
@@ -288,96 +260,3 @@ The prediction of the query node $q$ is given by:
 $$
 \hat{y}_q = \arg\max \boldsymbol{s}_q
 $$
-
-
-## Architecture
-
-### Core Components
-
-- **`model/`**: Neural network architectures
-  - `base.py`: Base GNN implementations and custom SAGE convolution
-  - `FiLM.py`: Domain adaptation FiLM layers
-  - `fingerprint.py`: Domain fingerprint generation
-  - `pt_model.py`: Main pretraining model
-  - `space_comb.py`: Feature space combination utilities
-
-- **`data_process/`**: Data loading and preprocessing
-  - `data.py`: Dataset classes for single graphs and combined datasets
-  - `datahelper.py`: Data preprocessing utilities and text encoders
-  - `task_constructor.py`: Task construction for different learning scenarios
-
-- **`configs/`**: Hydra configuration files
-  - `main.yaml`: Main experiment configuration with paths and pretraining settings
-  - `model.yaml`: Model architecture hyperparameters
-  - `data.yaml`: Dataset configurations and task definitions
-
-- **`utils/`**: Utility functions
-  - `config.py`: Configuration utilities and OmegaConf resolvers
-  - `exp.py`: Experiment initialization
-  - `logging.py`: Logging utilities
-  - `utils.py`: General utilities including seed setting
-
-### Key Design Patterns
-
-- Uses Hydra for configuration management with hierarchical configs
-- Implements custom PyTorch Geometric MessagePassing layer (MySAGEConv)
-- Supports both node features and edge features in graph convolutions
-- Uses PCA for feature dimensionality reduction and alignment
-- Implements domain-specific fingerprinting for cross-dataset alignment
-
-## Development Commands
-
-### Running Pretraining
-```bash
-python pretrain.py
-```
-
-### Configuration Override Examples
-```bash
-# Override specific config values
-python pretrain.py model.name=CustomModel pretrain.pretrain_epochs=100
-
-# Use different dataset configuration
-python pretrain.py dataset=Xcora pretrain.gpu=0
-```
-
-## Important Implementation Details
-
-### Custom Graph Convolution
-The project uses a custom SAGE convolution (`MySAGEConv`) that incorporates edge features:
-- Located in `model/base.py:23-114`
-- Combines node features with edge features during message passing
-- Uses `(x_j + xe).relu()` for message computation
-
-### Configuration System
-- Uses Hydra with nested configurations
-- Main config merges data.yaml and model.yaml automatically
-- Support for environment-specific user configs
-- Custom OmegaConf resolvers for eval and alias renaming
-
-### Dataset Handling
-- Supports both PyTorch Geometric datasets (pyg) and OFA text datasets (ofa)
-- Implements custom dataset classes for single graphs and multi-dataset combinations
-- Uses metadata lookup system in `data.yaml` for dataset routing
-
-### Pretraining Architecture
-- Combines multiple datasets into single training batches
-- Uses domain embeddings for cross-dataset alignment
-- Supports various task types: node classification, link prediction, knowledge graph completion
-
-## File Organization
-
-- Configuration files use YAML with Hydra @package declarations
-- Python modules follow standard structure with clear separation of concerns
-- Datasets stored in `datasets/` with source-specific subdirectories
-- Output and temporary files organized under project root with unique identifiers
-
-## Dependencies
-
-Key dependencies inferred from imports:
-- PyTorch and PyTorch Geometric
-- Hydra for configuration
-- OmegaConf for config manipulation
-- scikit-learn for PCA
-- Weights & Biases for experiment tracking
-- rootutils for project root management

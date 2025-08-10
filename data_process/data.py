@@ -16,7 +16,6 @@ from abc import ABC
 import json
 import functools
 from torch_geometric.transforms import ToUndirected
-import random
 
 class SingleGraphDataset(InMemoryDataset, ABC):
     # for single graph for node/link task  cora and pubmed we use the provided encoded node features
@@ -64,6 +63,9 @@ class SingleGraphDataset(InMemoryDataset, ABC):
         # self.adj = self._build_adj(self.data.edge_index, self.num_nodes)
         self.edge_index = self.data.edge_index
         self.labels = self.data.y
+        self.train_mask = self.data.train_mask if hasattr(self.data, 'train_mask') else None
+        self.val_mask = self.data.val_mask if hasattr(self.data, 'val_mask') else None
+        self.test_mask = self.data.test_mask if hasattr(self.data, 'test_mask') else None
         if not load_text:
             self.pca_feat = self.data.pca_x
 

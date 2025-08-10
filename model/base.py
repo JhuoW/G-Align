@@ -138,6 +138,7 @@ class BackboneGNN(nn.Module):
                 dims = [in_dim] + [self.hidden_dim] * (self.n_layers)
         for d_in, d_out in zip(dims[:-1], dims[1:]):
             self.gnns.append(make_conv(d_in, d_out, fp_conf.conv_type, add_self_loops=fp_conf.add_self_loops, heads=fp_conf.n_heads))
+        self.gnn_layer_name = fp_conf.conv_type
         self.bn = fp_conf.use_bn
         self.bns = nn.ModuleList([nn.BatchNorm1d(self.hidden_dim) for _ in self.gnns])
         # self.readout_proj = fp_conf.readout_proj
@@ -148,7 +149,10 @@ class BackboneGNN(nn.Module):
     def encode(self, x, edge_index, edge_attr = None, batch = None):
         h = x
         for l, (conv, bn) in enumerate(zip(self.gnns, self.bns)):
-            h = conv(h, edge_index, edge_attr)
+            if self.gnn_layer_name == 'MySAGE':
+                h = conv(h, edge_index, edge_attr)
+            else:
+                h = conv(h, edge_index)
             if l != self.n_layers - 1:
                 if self.bn:
                     h = bn(h)
