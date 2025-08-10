@@ -117,7 +117,7 @@ class ConvProjection(nn.Module):
                 conv_layers.append(nn.MaxPool2d(pool_size, pool_stride))
             in_channels = out_channels
         
-        self.conv = nn.Sequential(*conv_layers)
+        self.conv_layers = nn.Sequential(*conv_layers)
 
         self.adaptive_pool = nn.AdaptiveAvgPool2d((adaptive_pool_size, adaptive_pool_size))
         final_conv_channels = hidden_channels * (2 ** (num_conv_layers - 1))
@@ -216,7 +216,7 @@ class DomainEmbeddingExtractor:
                 self._delta_matrices = torch.load(self._pth('delta_matrices.pt'), weights_only=False)  # domain embeddings of pretraining graphs
                 
                 # Restore backbone to theta0
-                self.backbone.load_state_dict(self._theta0, strict=False)
+                self.frozen_backbone.load_state_dict(self._theta0, strict=False)
                 self._cached = True
         elif self.cfg.Fingerprint.DE_type == 'pca':
             if (self._pth('B.pt').exists() and 
@@ -258,6 +258,12 @@ class DomainEmbeddingExtractor:
             torch.save(self._theta0, self._pth('theta0.pt'))
         if self._delta_matrices is not None:
             torch.save([dm.cpu() for dm in self._delta_matrices], self._pth('delta_matrices.pt'))
+        if hasattr(self, '_padded_delta_matrices') and self._padded_delta_matrices is not None:
+            torch.save([dm.cpu() for dm in self._padded_delta_matrices], self._pth('padded_delta_matrices.pt'))
+        if hasattr(self, '_original_shapes'):
+            torch.save(self._original_shapes, self._pth('original_shapes.pt'))
+        if hasattr(self, '_d_c_max'):
+            torch.save(self._d_c_max, self._pth('d_c_max.pt'))
         self._cached = True
 
     @torch.no_grad()
@@ -307,9 +313,6 @@ class DomainEmbeddingExtractor:
 
 
         x_i, edge_index_i, node_idx, y_i, num_nodes, xe_i = self._domain_subgraph(data, domain_idx)
-
-        d_c_original = int(y_i.max().item()) + 1
-        d = x_i.shape[1]
         
         x_i, edge_index_i, y_i = self._sample_nodes(x_i, edge_index_i, y_i, self.cfg.Fingerprint.max_nodes if self.cfg.Fingerprint.get('max_nodes', None) is not None else num_nodes)
 
@@ -358,7 +361,7 @@ class DomainEmbeddingExtractor:
                 d_c = int(y_i.max().item()) + 1
                 expected_size = d * d_c
                 if grad_vec.numel() >= expected_size:
-                    grad_matrix = grad_vec[:expected_size].view(d_c, d)
+                    grad_matrix = grad_vec[:expected_size].view(d, d_c)
                 else:
                     padded = torch.zeros(expected_size, device=self.device)
                     padded[:grad_vec.numel()] = grad_vec
@@ -437,22 +440,52 @@ class DomainEmbeddingExtractor:
         data = data.to(self.device)
         M = int(data.batch.max().item()) + 1
         delta_matrices = []  # gradient matrices for each domain
+        original_shapes = []
         for i in range(M):
             delta_i = self._probe_grad4domain(data, None, i)
             delta_matrices.append(delta_i)
-        
+            original_shapes.append(delta_i.shape)
 
+        d = delta_matrices[0].shape[0]
+        d_c_max = max(delta.shape[1] for delta in delta_matrices)
+        padding_strategy = self.cfg.Fingerprint.DE.get('padding_strategy', 'zero')
+        padding_noise_std = self.cfg.Fingerprint.DE.get('padding_noise_std', 0.01)
+        # pad all matrices to have the same shape (d, d_c_max)
+        padded_deltas = []
+        for i, delta in enumerate(delta_matrices):
+            d_c_i = delta.shape[1]
+            if d_c_i< d_c_max:
+                if padding_strategy == 'zero':
+                    padding = torch.zeros(d, d_c_max - d_c_i, device=delta.device)
+                elif padding_strategy == 'noise':
+                    padding = torch.randn(d, d_c_max - d_c_i, device=delta.device) * padding_noise_std
+                elif padding_strategy == 'repeat_last':
+                    # Repeat the last column
+                    last_col = delta[:, -1:].repeat(1, d_c_max - d_c_i)
+                    padding = last_col
+                else:
+                    padding = torch.zeros(d, d_c_max-d_c_i, device=delta.device)
+                delta_padded = torch.cat([delta, padding], dim=1)
+            else:
+                delta_padded = delta
+            padded_deltas.append(delta_padded)
+        
         self._delta_matrices = delta_matrices
-        self._train_projection(delta_matrices)  
+        self._padded_delta_matrices = padded_deltas
+        self.original_shapes = original_shapes
+        self._d_c_max = d_c_max
+        
+        self._train_projection(padded_deltas)  
 
         embeddings = []
-        for delta in delta_matrices:
-            delta = delta.to(self.device)
+        for delta_padded in padded_deltas:
+            delta_padded = delta_padded.to(self.device)
             with torch.no_grad():
-                e_i = self.projection(delta)
+                e_i = self.projection(delta_padded)
                 if self.cfg.Fingerprint.l2_normalize:
                     e_i = F.normalize(e_i, p=2, dim=-1)
                 embeddings.append(e_i)
+
         self._e = torch.stack(embeddings, dim=0)  
 
         self._save_cache()
@@ -498,6 +531,7 @@ class DomainEmbeddingExtractor:
                 gram = E @ E.T
                 diversity_loss = -torch.logdet(gram + 1e-6 * torch.eye(M, device=self.device))
                 loss = loss + diversity_weight * diversity_loss
+            loss.requires_grad = True
             loss.backward()
             optimizer.step()
             if epoch % 20 == 0:
@@ -551,6 +585,7 @@ class DomainEmbeddingExtractor:
         if not hasattr(data_new, 'batch'):
             data_new.batch = torch.zeros(data_new.x.shape[0], dtype=torch.long, device=self.device)
         
+
         H, _ = self.frozen_backbone(data_new)
 
         y = data_new.y
@@ -582,6 +617,16 @@ class DomainEmbeddingExtractor:
                 grad_matrix = grad_matrix.T
         
         delta_new = -self.cfg.Fingerprint.probe_lr * grad_matrix
+
+        if hasattr(self, '_d_c_max'):
+            d = delta_new.shape[0]
+            d_c_new = delta_new.shape[1]
+            if d_c_new < self._d_c_max:
+                padding = torch.zeros(d, self._d_c_max-d_c_new, device=self.device)
+                delta_new = torch.cat([delta_new, padding], dim=1)
+            elif d_c_new > self._d_c_max:
+                delta_new = delta_new[:, :self._d_c_max]
+        
         e_new = self.projection(delta_new)
         if self.cfg.Fingerprint.l2_normalize:
             e_new = F.normalize(e_new, p=2, dim=-1)

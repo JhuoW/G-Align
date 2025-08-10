@@ -44,10 +44,11 @@ Fingerprint:
     adaptive_pool_size: 4  # Size for adaptive average pooling (outputs 4x4)
     mlp_hidden_dims: [256, 128]  # Hidden dimensions for final MLP
     mlp_dropout: 0.2  # Dropout rate for MLP
-    train_epochs: 100  # Number of epochs to train projection
+    train_epochs: 300  # Number of epochs to train projection
     train_lr: 1e-3  # Learning rate for training projection
     diversity_weight: 0.1  # Weight for diversity regularization when M < d_e
-    
+    padding_strategy: 'zero'  # or 'noise' or 'repeat_last'
+    padding_noise_std: 0.01  # if using 'noise'
 
 FiLM:
   hidden_dim: 64

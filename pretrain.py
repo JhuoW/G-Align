@@ -80,16 +80,16 @@ def main(cfg:DictConfig):
     else:
         pretrain_device = torch.device("cpu")
 
-    if cfg.remove_dir:
-        if osp.exists(cfg.dirs.output):
-            logger.info(f"Removing output directory: {cfg.dirs.output}")
-            os.system(f"rm -rf {cfg.dirs.output}")
-        if osp.exists(cfg.dirs.checkpoint_dir):
-            logger.info(f"Removing checkpoint directory: {cfg.dirs.checkpoint_dir}")
-            os.system(f"rm -rf {cfg.dirs.checkpoint_dir}")
-        if osp.exists(cfg.dirs.temp):
-            logger.info(f"Removing temp directory: {cfg.dirs.temp}")
-            os.system(f"rm -rf {cfg.dirs.temp}")
+    # if cfg.remove_dir:
+    #     if osp.exists(cfg.dirs.output):
+    #         logger.info(f"Removing output directory: {cfg.dirs.output}")
+    #         os.system(f"rm -rf {cfg.dirs.output}")
+    #     if osp.exists(cfg.dirs.checkpoint_dir):
+    #         logger.info(f"Removing checkpoint directory: {cfg.dirs.checkpoint_dir}")
+    #         os.system(f"rm -rf {cfg.dirs.checkpoint_dir}")
+    #     if osp.exists(cfg.dirs.temp):
+    #         logger.info(f"Removing temp directory: {cfg.dirs.temp}")
+    #         os.system(f"rm -rf {cfg.dirs.temp}")
 
     # train on ['pubmed_link','pubmed_node','arxiv','wikics']
     # test on ['cora_node']
@@ -127,6 +127,7 @@ def main(cfg:DictConfig):
     # Setup Callbacks
     checkpoint_dir = osp.join(cfg.dirs.checkpoint_dir, "checkpoints")
     os.makedirs(checkpoint_dir, exist_ok=True)
+    os.makedirs(cfg.dirs.output, exist_ok=True)
 
     checkpoint_callback = ModelCheckpoint(dirpath=checkpoint_dir,
                                           filename = "gfm-{epoch:02d}-{val_loss:.4f}",

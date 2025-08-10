@@ -13,10 +13,10 @@ project_root: ${hydra:runtime.cwd}
 dirs:
   data_storage: ${project_root}/datasets/   # For datasets
   hydra: ${.temp}hydra/
-  output: ${project_root}/output/${model.name}/${uid}/ # For files to be saved, to be initialized
-  fingerprint_storage: ${project_root}/fingerprint/  # For fingerprint files
-  checkpoint_dir: ${project_root}/checkpoints/${model.name}/${uid}/  # For model checkpoints
-  temp: ${project_root}/temp/working_dir/${uid}/  
+  output: ${project_root}/generated_files/output/${model.name}/${uid}/ # For files to be saved, to be initialized
+  fingerprint_storage: ${project_root}/generated_files/fingerprint/  # For fingerprint files
+  checkpoint_dir: ${project_root}/generated_files/checkpoints/${model.name}/${uid}/  # For model checkpoints
+  temp: ${project_root}/generated_files/temp/working_dir/${uid}/  
 
 res_file: ${dirs.output}seed${seed}_results.json
 uid: null # To be generated in the main program
@@ -30,7 +30,7 @@ pretrain:
   train_tasks: ['pubmed_link','pubmed_node','arxiv','wikics']
   eval_tasks: ['cora_node']
   use_original_mask: false
-  pretrain_epochs: 50
+  pretrain_epochs: 200
 
   k_shot: 5
   m_way: 10

@@ -14,19 +14,19 @@ class DataModule(pl.LightningDataModule):
         self.train_ds = EpisodeDataset(data = data, k = k, m = m, n = n, t = t)
         self.val_ds = EpisodeDataset(data = data, k = k, m = m, n = n//5, t = t)  # Fewer episodes for validation
         self.test_ds = EpisodeDataset(data = data, k = k, m = m, n = n//5, t = t)
-        self.batch_size = (n*int(data.ptr.numel()-1)) if batch_size is None else batch_size
-    
+        if batch_size is None:
+            self.batch_size = (n*int(data.ptr.numel()-1)) 
     def train_dataloader(self):
         return DataLoader(self.train_ds, batch_size=self.batch_size, shuffle=False, 
-                         num_workers=0, pin_memory=True, collate_fn= lambda x: x)
+                         num_workers=47, pin_memory=True, collate_fn= lambda x: x)
     
     def val_dataloader(self):
         return DataLoader(self.val_ds, batch_size=self.batch_size, shuffle=False,
-                         num_workers=0, pin_memory=True, collate_fn= lambda x: x)
+                         num_workers=47, pin_memory=True, collate_fn= lambda x: x)
     
     def test_dataloader(self):
         return DataLoader(self.test_ds, batch_size=self.batch_size, shuffle=False,
-                         num_workers=0, pin_memory=True, collate_fn= lambda x: x)
+                         num_workers=47, pin_memory=True, collate_fn= lambda x: x)
 
 
 class PAMA(nn.Module):
@@ -207,8 +207,8 @@ class GFM(pl.LightningModule):
 
             gamma_f, beta_f = self.gamma_f[gid], self.beta_f[gid]
 
-            z_sup = gamma_f * self.H[idx_sup] + beta_f
-            z_qry = gamma_f * self.H[idx_qry] + beta_f
+            z_sup = gamma_f * H[idx_sup] + beta_f
+            z_qry = gamma_f * H[idx_qry] + beta_f
 
             gamma_l, beta_l = self.gamma_l[gid], self.beta_l[gid]
             U_sup_base = self.E_lab[classes]
@@ -267,8 +267,8 @@ class GFM(pl.LightningModule):
             classes = ep['classes'].to(self.device)
 
             gamma_f, beta_f = self.gamma_f[gid], self.beta_f[gid]
-            z_sup = gamma_f * self.H[idx_sup] + beta_f
-            z_qry = gamma_f * self.H[idx_qry] + beta_f
+            z_sup = gamma_f * H[idx_sup] + beta_f
+            z_qry = gamma_f * H[idx_qry] + beta_f
 
             gamma_l, beta_l = self.gamma_l[gid], self.beta_l[gid]
             U_sup_base = self.E_lab[classes]
