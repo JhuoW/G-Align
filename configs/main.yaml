@@ -25,7 +25,7 @@ remove_dir: false
 
 pretrain:
   seed: 42
-  gpu: 2
+  gpu: 1
   pretrain_datasets: ['pubmed', 'arxiv', 'wikics']
   train_tasks: ['pubmed_link','pubmed_node','arxiv','wikics']
   eval_tasks: ['cora_node']
