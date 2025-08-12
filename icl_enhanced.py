@@ -377,9 +377,9 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description="Enhanced G-Align Prototype ICL")
-    parser.add_argument('--model_path', type=str, default='generated_files/output/G-Align/final_gfm_model.pt')
+    parser.add_argument('--model_path', type=str, default='generated_files/output/G-Align/Aug11-17:00-9929422f/final_gfm_model.pt')
     parser.add_argument('--dataset', type=str, default='cora')
-    parser.add_argument('--k_shot', type=int, default=3)
+    parser.add_argument('--k_shot', type=int, default=5)
     parser.add_argument('--n_runs', type=int, default=10)
     parser.add_argument('--gpu_id', type=int, default=0)
     parser.add_argument('--seed', type=int, default=42)
