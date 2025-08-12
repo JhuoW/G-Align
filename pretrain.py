@@ -102,16 +102,28 @@ def main(cfg:DictConfig):
     logger.info(f"Maximum label count across datasets: {L_max}")
 
     input_dim = comb_graphs.x.size(-1)
-    backbone_gnn = BackboneGNN(in_dim=input_dim, num_classes=L_max, cfg=cfg).to(pretrain_device)
+    # n_layer = 1 readout_proj = true
 
-    frozen_backbone = copy.deepcopy(backbone_gnn)
-    frozen_backbone.n_layers = 1
-    frozen_backbone.readout_proj = False
-    # for param in frozen_backbone.parameters():
-    #     param.requires_grad = False
+    if cfg.Fingerprint.n_layers == 1 and cfg.Fingerprint.readout_proj:
+        backbone_gnn = BackboneGNN(in_dim=input_dim, num_classes=L_max, cfg=cfg).to(pretrain_device)
+
+        frozen_backbone = copy.deepcopy(backbone_gnn)
+
+        # The GNN has already created its layers based on the original n_layers, so just changing the attribute won't work correctly. 
+        frozen_backbone.n_layers = 1 # ! (do not work!) by this mean, always with the same GNN structure with the backbone_gnn
+        frozen_backbone.readout_proj = False
+        # for param in frozen_backbone.parameters():
+        #     param.requires_grad = False
+    else:
+        return 
 
 
     domain_embedder = DomainEmbedder(frozen_backboneGNN=frozen_backbone, cfg=cfg).to(pretrain_device)
+    
+
+    if domain_embedder.dm_extractor._cached:
+        _theta0 = domain_embedder.dm_extractor._theta0
+        backbone_gnn.load_state_dict(_theta0, strict=False)
 
     model = GFM(cfg = cfg,
                 L_max= L_max,
@@ -143,7 +155,7 @@ def main(cfg:DictConfig):
                                             verbose=True,
                                             mode="min")
     wandb_logger = WandbLogger(project=cfg.wandb.project,
-                               name = "Pretrain on tasks = {}".format(cfg.pretrain.pretrain_tasks),
+                               name = "Pretrain on tasks = {}, n_layers = {}".format(cfg.pretrain.pretrain_tasks, cfg.Fingerprint.n_layers),
                                save_dir=cfg.dirs.temp,
                                mode="disabled" if cfg.wandb.debug else "online",
                                config=OmegaConf.to_object(cfg)) if not cfg.wandb.debug else None
@@ -208,6 +220,7 @@ def main(cfg:DictConfig):
     
     wandb.finish()
     return model, final_model_path
+
 
 if __name__ == "__main__":
     main()

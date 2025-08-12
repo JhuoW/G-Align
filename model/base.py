@@ -148,8 +148,12 @@ class BackboneGNN(nn.Module):
             self.proj = nn.Linear(self.hidden_dim, self.num_classes)
 
 
-    def encode(self, x, edge_index, edge_attr = None, batch = None):
+    def encode(self, x, edge_index, edge_attr = None, batch = None, num_layers = None):
         h = x
+
+        # layers_to_use = num_layers if num_layers is not None else self.n_layers
+        # layers_to_use = min(layers_to_use, self.n_layers)
+
         for l, (conv, bn) in enumerate(zip(self.gnns, self.bns)):
             if self.gnn_layer_name == 'MySAGE':
                 h = conv(h, edge_index, edge_attr)

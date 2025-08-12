@@ -1,0 +1,17 @@
+{"time":"2025-08-11T17:00:43.246400772+08:00","level":"INFO","msg":"using version","core version":"0.18.7"}
+{"time":"2025-08-11T17:00:43.246422934+08:00","level":"INFO","msg":"created symlink","path":"/home/zhuowei/My_Proj/G-Align/generated_files/temp/working_dir/Aug11-17:00-9929422f/wandb/run-20250811_170043-smomk3ix/logs/debug-core.log"}
+{"time":"2025-08-11T17:00:43.455360013+08:00","level":"INFO","msg":"created new stream","id":"smomk3ix"}
+{"time":"2025-08-11T17:00:43.455392093+08:00","level":"INFO","msg":"stream: started","id":"smomk3ix"}
+{"time":"2025-08-11T17:00:43.455864825+08:00","level":"INFO","msg":"handler: started","stream_id":"smomk3ix"}
+{"time":"2025-08-11T17:00:43.455916312+08:00","level":"INFO","msg":"sender: started","stream_id":"smomk3ix"}
+{"time":"2025-08-11T17:00:43.455933294+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"smomk3ix"}
+{"time":"2025-08-11T17:00:44.56195613+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-12T02:25:22.930777823+08:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/graphql\": context deadline exceeded"}
+{"time":"2025-08-12T14:37:55.573657131+08:00","level":"INFO","msg":"stream: closing","id":"smomk3ix"}
+{"time":"2025-08-12T14:37:55.573890932+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-12T14:37:55.57457296+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-12T14:37:57.693636765+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-12T14:37:58.1872959+08:00","level":"INFO","msg":"handler: closed","stream_id":"smomk3ix"}
+{"time":"2025-08-12T14:37:58.187346465+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"smomk3ix"}
+{"time":"2025-08-12T14:37:58.18741245+08:00","level":"INFO","msg":"sender: closed","stream_id":"smomk3ix"}
+{"time":"2025-08-12T14:37:58.187425595+08:00","level":"INFO","msg":"stream: closed","id":"smomk3ix"}

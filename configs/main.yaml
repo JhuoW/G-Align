@@ -14,9 +14,17 @@ dirs:
   data_storage: ${project_root}/datasets/   # For datasets
   hydra: ${.temp}hydra/
   output: ${project_root}/generated_files/output/${model.name}/${uid}/ # For files to be saved, to be initialized
+  # output: ${project_root}/generated_files/output/${model.name}/ # For files to be saved, to be initialized
+
   fingerprint_storage: ${project_root}/generated_files/fingerprint/  # For fingerprint files
+
+
   checkpoint_dir: ${project_root}/generated_files/checkpoints/${model.name}/${uid}/  # For model checkpoints
+  # checkpoint_dir: ${project_root}/generated_files/checkpoints/${model.name}/
+
   temp: ${project_root}/generated_files/temp/working_dir/${uid}/
+  # temp: ${project_root}/generated_files/temp/working_dir/
+
 
 res_file: ${dirs.output}seed${seed}_results.json
 uid: null # To be generated in the main program

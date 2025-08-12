@@ -1,0 +1,17 @@
+{"time":"2025-08-10T22:41:41.420697701+08:00","level":"INFO","msg":"using version","core version":"0.18.7"}
+{"time":"2025-08-10T22:41:41.42071871+08:00","level":"INFO","msg":"created symlink","path":"/home/zhuowei/My_Proj/G-Align/generated_files/temp/working_dir/wandb/run-20250810_224141-aj74agtd/logs/debug-core.log"}
+{"time":"2025-08-10T22:41:41.528686426+08:00","level":"INFO","msg":"created new stream","id":"aj74agtd"}
+{"time":"2025-08-10T22:41:41.528725479+08:00","level":"INFO","msg":"stream: started","id":"aj74agtd"}
+{"time":"2025-08-10T22:41:41.52879476+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"aj74agtd"}
+{"time":"2025-08-10T22:41:41.530777216+08:00","level":"INFO","msg":"handler: started","stream_id":"aj74agtd"}
+{"time":"2025-08-10T22:41:41.53085849+08:00","level":"INFO","msg":"sender: started","stream_id":"aj74agtd"}
+{"time":"2025-08-10T22:41:42.16182304+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-11T13:17:17.033326238+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-11T13:17:17.03442526+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-11T13:17:18.034386156+08:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"saving job artifact","runtime_seconds":0.687877468},{"desc":"uploading config.yaml","runtime_seconds":0.426250957,"progress":"55.1KB/55.1KB"},{"desc":"uploading output.log","runtime_seconds":0.426239545,"progress":"213.1KB/213.1KB"}],"total_operations":3}}
+{"time":"2025-08-11T13:17:20.126217043+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-11T13:17:21.397119483+08:00","level":"INFO","msg":"stream: closing","id":"aj74agtd"}
+{"time":"2025-08-11T13:17:21.397292749+08:00","level":"INFO","msg":"handler: closed","stream_id":"aj74agtd"}
+{"time":"2025-08-11T13:17:21.39731432+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"aj74agtd"}
+{"time":"2025-08-11T13:17:21.397355027+08:00","level":"INFO","msg":"sender: closed","stream_id":"aj74agtd"}
+{"time":"2025-08-11T13:17:21.3974415+08:00","level":"INFO","msg":"stream: closed","id":"aj74agtd"}
