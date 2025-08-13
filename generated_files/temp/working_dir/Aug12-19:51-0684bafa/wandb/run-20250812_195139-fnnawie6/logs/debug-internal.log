@@ -1,0 +1,16 @@
+{"time":"2025-08-12T19:51:39.505749915+08:00","level":"INFO","msg":"using version","core version":"0.18.7"}
+{"time":"2025-08-12T19:51:39.505774781+08:00","level":"INFO","msg":"created symlink","path":"/home/zhuowei/My_Proj/G-Align/generated_files/temp/working_dir/Aug12-19:51-0684bafa/wandb/run-20250812_195139-fnnawie6/logs/debug-core.log"}
+{"time":"2025-08-12T19:51:39.612978437+08:00","level":"INFO","msg":"created new stream","id":"fnnawie6"}
+{"time":"2025-08-12T19:51:39.613032309+08:00","level":"INFO","msg":"stream: started","id":"fnnawie6"}
+{"time":"2025-08-12T19:51:39.615855051+08:00","level":"INFO","msg":"handler: started","stream_id":"fnnawie6"}
+{"time":"2025-08-12T19:51:39.615909023+08:00","level":"INFO","msg":"sender: started","stream_id":"fnnawie6"}
+{"time":"2025-08-12T19:51:39.615926175+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"fnnawie6"}
+{"time":"2025-08-12T19:51:40.704307261+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-12T21:45:06.50548018+08:00","level":"INFO","msg":"stream: closing","id":"fnnawie6"}
+{"time":"2025-08-12T21:45:06.505523411+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-12T21:45:06.506446573+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-12T21:45:08.465088118+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-12T21:45:08.749430051+08:00","level":"INFO","msg":"handler: closed","stream_id":"fnnawie6"}
+{"time":"2025-08-12T21:45:08.749495404+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"fnnawie6"}
+{"time":"2025-08-12T21:45:08.749598679+08:00","level":"INFO","msg":"sender: closed","stream_id":"fnnawie6"}
+{"time":"2025-08-12T21:45:08.749613857+08:00","level":"INFO","msg":"stream: closed","id":"fnnawie6"}

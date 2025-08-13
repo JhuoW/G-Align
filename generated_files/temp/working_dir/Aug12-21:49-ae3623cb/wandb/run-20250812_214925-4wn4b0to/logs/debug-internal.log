@@ -1,0 +1,16 @@
+{"time":"2025-08-12T21:49:25.818678624+08:00","level":"INFO","msg":"using version","core version":"0.18.7"}
+{"time":"2025-08-12T21:49:25.818700165+08:00","level":"INFO","msg":"created symlink","path":"/home/zhuowei/My_Proj/G-Align/generated_files/temp/working_dir/Aug12-21:49-ae3623cb/wandb/run-20250812_214925-4wn4b0to/logs/debug-core.log"}
+{"time":"2025-08-12T21:49:25.92666079+08:00","level":"INFO","msg":"created new stream","id":"4wn4b0to"}
+{"time":"2025-08-12T21:49:25.926691839+08:00","level":"INFO","msg":"stream: started","id":"4wn4b0to"}
+{"time":"2025-08-12T21:49:25.926854375+08:00","level":"INFO","msg":"handler: started","stream_id":"4wn4b0to"}
+{"time":"2025-08-12T21:49:25.926921161+08:00","level":"INFO","msg":"sender: started","stream_id":"4wn4b0to"}
+{"time":"2025-08-12T21:49:25.926956648+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"4wn4b0to"}
+{"time":"2025-08-12T21:49:27.10362176+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-13T00:11:50.754227129+08:00","level":"INFO","msg":"stream: closing","id":"4wn4b0to"}
+{"time":"2025-08-13T00:11:50.75460503+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-13T00:11:50.755982421+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-13T00:11:52.844574967+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-13T00:11:53.134035504+08:00","level":"INFO","msg":"handler: closed","stream_id":"4wn4b0to"}
+{"time":"2025-08-13T00:11:53.134103542+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"4wn4b0to"}
+{"time":"2025-08-13T00:11:53.134177021+08:00","level":"INFO","msg":"sender: closed","stream_id":"4wn4b0to"}
+{"time":"2025-08-13T00:11:53.134188973+08:00","level":"INFO","msg":"stream: closed","id":"4wn4b0to"}

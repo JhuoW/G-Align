@@ -14,7 +14,7 @@ import wandb
 from omegaconf import OmegaConf
 from data_process.task_constructor import train_task_constructor, UnifiedTaskConstructor
 from data_process.datahelper import refine_dataset, span_node_and_edge_idx, filter_unnecessary_attrs
-from model.base import BackboneGNN
+from model.base import BackboneGNN, FlexibleBackboneGNN, BackboneGNN2
 from model.fingerprint import DomainEmbedder
 from model.pt_model import GFM, DataModule
 import pytorch_lightning as pl
@@ -23,14 +23,73 @@ from pytorch_lightning.loggers import WandbLogger
 import os
 import os.path as osp
 import copy
-# import argparse
 
-# def get_args_pretrain():
-#     parser = argparse.ArgumentParser('Pretrain')
 
-#     parser.add_argument('--remove_dir', action="store_true", default=False)
-#     args = parser.parse_args()
-#     return args
+def create_backbone_and_frozen_copy(input_dim, L_max, cfg, pretrain_device):
+    """
+    Create the backbone GNN and its frozen copy for fingerprinting.
+    
+    The backbone will have n_layers as specified in cfg.Fingerprint.n_layers (e.g., 2)
+    The frozen copy will have n_layers_fingerprint layers (e.g., 1)
+    They will share the same initialization for the first layer.
+    """
+    
+    # Get layer configurations
+    n_layers_train = cfg.Fingerprint.n_layers  # e.g., 2 layers for training
+    n_layers_fingerprint = cfg.Fingerprint.n_layers_fingerprint if hasattr(cfg.Fingerprint, 'n_layers_fingerprint') else 1
+    
+    logger.info(f"Creating backbone with {n_layers_train} layers for training")
+    logger.info(f"Creating frozen backbone with {n_layers_fingerprint} layers for fingerprinting")
+    
+    # Option 1: Use FlexibleBackboneGNN (recommended)
+    if cfg.Fingerprint.get('use_flexible_backbone', True):
+        # Create the main backbone with all layers
+        backbone_gnn = FlexibleBackboneGNN(
+            in_dim=input_dim, 
+            num_classes=L_max, 
+            cfg=cfg,
+            fingerprint_layers=n_layers_fingerprint
+        ).to(pretrain_device)
+        
+        # Create a smaller frozen copy for fingerprinting
+        frozen_backbone = backbone_gnn.create_fingerprint_copy().to(pretrain_device)
+        
+    else:
+        # Option 2: Manual approach with standard BackboneGNN
+        
+        # Create the main backbone with n_layers_train layers
+        backbone_gnn = BackboneGNN2(in_dim=input_dim, num_classes=L_max, cfg=cfg).to(pretrain_device)
+        
+        # Create a config for the frozen backbone with fewer layers
+        cfg_frozen = copy.deepcopy(cfg)
+        cfg_frozen.Fingerprint.n_layers = n_layers_fingerprint
+        
+        # Create the frozen backbone with fewer layers
+        frozen_backbone = BackboneGNN2(in_dim=input_dim, num_classes=L_max, cfg=cfg_frozen).to(pretrain_device)
+        
+        # Copy the first n_layers_fingerprint layers from backbone to frozen_backbone
+        # This ensures they share the same initialization
+        state_dict = backbone_gnn.get_submodel_state_dict(n_layers_fingerprint)
+        frozen_backbone.load_state_dict(state_dict, strict=False)
+    
+    # Verify the setup
+    logger.info(f"Backbone GNN has {len(backbone_gnn.gnns)} conv layers")
+    logger.info(f"Frozen backbone has {len(frozen_backbone.gnns)} conv layers")
+    
+    # Double-check that first layer weights are the same
+    if len(frozen_backbone.gnns) > 0:
+        with torch.no_grad():
+            # Get first layer weights from both models
+            main_first_layer = next(backbone_gnn.gnns[0].parameters())
+            frozen_first_layer = next(frozen_backbone.gnns[0].parameters())
+            
+            # Check if they're the same (should be after copying)
+            if torch.allclose(main_first_layer, frozen_first_layer):
+                logger.info("First layer weights are shared between main and frozen backbone")
+            else:
+                logger.warning("First layer weights differ between main and frozen backbone")
+    
+    return backbone_gnn, frozen_backbone
 
 
 def init_wandb(cfg):
@@ -55,7 +114,7 @@ def get_pretrain_data(cfg, pretrain_device):
     pretrain_dataset_dict = {}
     data_config_lookup = cfg.data_config
     # 获取预训练数据集
-    for ds_name in pretrain_ds_names_lst: # ['pubmed', 'arxiv', 'wikics']
+    for ds_name in pretrain_ds_names_lst: # ['pubmed', 'arxiv', 'wikics', 'amazon-ratings']
         if ds_name not in pretrain_dataset_dict:
             data_config = data_config_lookup[ds_name]
             dataset = tasks.get_dataset(cfg, data_config)
@@ -65,6 +124,7 @@ def get_pretrain_data(cfg, pretrain_device):
             pretrain_dataset_dict[ds_name] = dataset
     
     # Data(x=[200761, 64], edge_index=[2, 2835972], y=[200761], batch=[200761], ptr=[4],name_dict={pubmed=0,arxiv=1,wikics=2,})
+    # Data(x=[225253, 64], edge_index=[2, 3022072], y=[225253], xe=[3022072, 1], batch=[225253], ptr=[5], name_dict={pubmed=0,arxiv=1,wikics=2,amazon-ratings=3,})
     combined_pretrained_dataset = CombineDataset(cfg=cfg, pretrain_ds_dict = pretrain_dataset_dict, pretrain_device=pretrain_device).combine_graph()
     combined_pretrained_data = combined_pretrained_dataset[0]
     return combined_pretrained_data, pretrain_tasks
@@ -103,7 +163,6 @@ def main(cfg:DictConfig):
 
     input_dim = comb_graphs.x.size(-1)
     # n_layer = 1 readout_proj = true
-
     if cfg.Fingerprint.n_layers == 1 and cfg.Fingerprint.readout_proj:
         backbone_gnn = BackboneGNN(in_dim=input_dim, num_classes=L_max, cfg=cfg).to(pretrain_device)
 
@@ -115,15 +174,19 @@ def main(cfg:DictConfig):
         # for param in frozen_backbone.parameters():
         #     param.requires_grad = False
     else:
-        return 
+        backbone_gnn, frozen_backbone = create_backbone_and_frozen_copy(input_dim, L_max, cfg, pretrain_device) 
 
 
     domain_embedder = DomainEmbedder(frozen_backboneGNN=frozen_backbone, cfg=cfg).to(pretrain_device)
     
 
-    if domain_embedder.dm_extractor._cached:
+    if domain_embedder.dm_extractor._cached and cfg.Fingerprint.n_layers == 1 and cfg.Fingerprint.readout_proj:
         _theta0 = domain_embedder.dm_extractor._theta0
         backbone_gnn.load_state_dict(_theta0, strict=False)
+    elif domain_embedder.dm_extractor._cached and cfg.Fingerprint.n_layers != 1 and cfg.Fingerprint.readout_proj:
+        _theta0 = domain_embedder.dm_extractor._theta0
+        backbone_gnn.load_state_dict(_theta0, strict=False)
+    
 
     model = GFM(cfg = cfg,
                 L_max= L_max,

@@ -34,11 +34,11 @@ remove_dir: false
 pretrain:
   seed: 42
   gpu: 1
-  pretrain_datasets: ['pubmed', 'arxiv', 'wikics']
-  train_tasks: ['pubmed_link','pubmed_node','arxiv','wikics']
+  pretrain_datasets: ['pubmed', 'arxiv', 'wikics', 'amazon-ratings']
+  train_tasks: ['pubmed_link','pubmed_node','arxiv','wikics', 'amazon-ratings']
   eval_tasks: ['cora_node']
   use_original_mask: false
-  pretrain_epochs: 3000
+  pretrain_epochs: 6000
 
   k_shot: 5
   m_way: 10

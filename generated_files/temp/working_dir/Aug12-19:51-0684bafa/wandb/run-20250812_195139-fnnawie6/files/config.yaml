@@ -1,0 +1,1093 @@
+_all_datasets:
+    value:
+        - cora
+        - pubmed
+        - arxiv
+        - wikics
+        - amazon-ratings
+_dataset_lookup:
+    value:
+        XFB15K237:
+            eval:
+                - FB15K237
+            train:
+                - cora
+                - pubmed
+                - arxiv
+                - wikics
+                - amazon-ratings
+        XWN18RR:
+            eval:
+                - WN18RR
+            train:
+                - cora
+                - pubmed
+                - arxiv
+                - wikics
+                - amazon-ratings
+        Xarxiv:
+            eval:
+                - arxiv
+            train:
+                - cora
+                - pubmed
+                - arxiv
+                - wikics
+                - amazon-ratings
+        Xchemblpre:
+            eval:
+                - chemblpre
+            train:
+                - cora
+                - pubmed
+                - arxiv
+                - wikics
+                - amazon-ratings
+        Xchemhiv:
+            eval:
+                - chemhiv
+            train:
+                - cora
+                - pubmed
+                - arxiv
+                - wikics
+                - amazon-ratings
+        Xchempcba:
+            eval:
+                - chempcba
+            train:
+                - cora
+                - pubmed
+                - arxiv
+                - wikics
+                - amazon-ratings
+        Xcora:
+            eval:
+                - cora
+            train:
+                - cora
+                - pubmed
+                - arxiv
+                - wikics
+                - amazon-ratings
+        Xpubmed:
+            eval:
+                - pubmed
+            train:
+                - cora
+                - pubmed
+                - arxiv
+                - wikics
+                - amazon-ratings
+        Xwikics:
+            eval:
+                - wikics
+            train:
+                - cora
+                - pubmed
+                - arxiv
+                - wikics
+                - amazon-ratings
+_ds_meta_data:
+    value:
+        Chameleon: pyg, WikipediaNetwork.chameleon
+        Cornell: pyg, WebKB.cornell
+        Squirrel: pyg, WikipediaNetwork.squirrel
+        Texas: heterophilous, texas_4_classes
+        Wisconsin: dgl, WisconsinDataset
+        amazon-ratings: pyg, HeterophilousGraphDataset.Amazon-ratings
+        arxiv: ofa, SingleTextGraph.arxiv
+        cora: pyg, Planetoid.Cora
+        pubmed: pyg, Planetoid.PubMed
+        wikics: ofa, SingleTextGraph.WikiCS
+_wandb:
+    value:
+        cli_version: 0.18.7
+        m:
+            - "1": val_acc
+              "5": 2
+              "6":
+                - 1
+                - 3
+              "7": []
+            - "1": trainer/global_step
+              "6":
+                - 3
+              "7": []
+            - "1": train_loss_step
+              "5": 2
+              "6":
+                - 1
+                - 3
+              "7": []
+            - "1": train_acc_step
+              "5": 2
+              "6":
+                - 1
+                - 3
+              "7": []
+            - "1": epoch
+              "5": 2
+              "6":
+                - 1
+                - 3
+              "7": []
+            - "1": train_loss_epoch
+              "5": 2
+              "6":
+                - 1
+                - 3
+              "7": []
+            - "1": train_acc_epoch
+              "5": 2
+              "6":
+                - 1
+                - 3
+              "7": []
+            - "1": val_loss
+              "5": 2
+              "6":
+                - 1
+                - 3
+              "7": []
+        python_version: 3.12.7
+        t:
+            "1":
+                - 1
+                - 5
+                - 9
+                - 11
+                - 41
+                - 49
+                - 50
+                - 53
+                - 55
+                - 75
+                - 76
+                - 77
+                - 103
+            "2":
+                - 1
+                - 5
+                - 9
+                - 11
+                - 41
+                - 49
+                - 50
+                - 53
+                - 55
+                - 75
+                - 76
+                - 77
+                - 103
+            "3":
+                - 7
+                - 13
+                - 16
+                - 23
+                - 55
+                - 66
+            "4": 3.12.7
+            "5": 0.18.7
+            "6": 4.36.2
+            "8":
+                - 5
+            "12": 0.18.7
+            "13": linux-x86_64
+FiLM:
+    value:
+        aligned_feat_dim: 64
+        dropout: 0.5
+        hidden_dim: 64
+        layernorm: false
+        num_layers: 2
+        softplus: true
+Fingerprint:
+    value:
+        DE:
+            adaptive_pool_size: 4
+            diversity_weight: 0.1
+            hidden_channels: 32
+            kernel_size: 3
+            mlp_dropout: 0.2
+            mlp_hidden_dims:
+                - 256
+                - 128
+            num_conv_layers: 2
+            padding: 1
+            padding_noise_std: 0.01
+            padding_strategy: zero
+            pool_size: 2
+            pool_stride: 2
+            train_epochs: 300
+            train_lr: 0.001
+            use_maxpool: true
+        DE_type: conv
+        add_self_loops: true
+        compressed_dim: 64
+        contrast_loss:
+            detach_embed: true
+            probe_mask_ratio: 0.3
+            probe_neigh_weight: 1
+            probe_recon_weight: 1
+        conv_type: SAGE
+        device: null
+        dropout: 0.5
+        fp_proj_dim: 64
+        hidden_dim: 64
+        l2_normalize: true
+        loss_type: ce
+        n_heads: 8
+        n_layers: 2
+        n_layers_fingerprint: 1
+        pca_svd_full: false
+        pca_whiten: true
+        probe_lr: 0.01
+        random_state: 42
+        readout_proj: true
+        require_grad_only: true
+        task: node_cls
+        use_bn: false
+L_max:
+    value: 58
+PAMA:
+    value:
+        d_attn: 64
+        dropout: 0.5
+        heads: 1
+PTModel:
+    value:
+        lr: 0.01
+        weight_decay: 0.0005
+batch_size:
+    value: 512
+cfg:
+    value: '{''project_root'': ''${hydra:runtime.cwd}'', ''dirs'': {''data_storage'': ''${project_root}/datasets/'', ''hydra'': ''${.temp}hydra/'', ''output'': ''${project_root}/generated_files/output/${model.name}/${uid}/'', ''fingerprint_storage'': ''${project_root}/generated_files/fingerprint/'', ''checkpoint_dir'': ''${project_root}/generated_files/checkpoints/${model.name}/${uid}/'', ''temp'': ''${project_root}/generated_files/temp/working_dir/${uid}/''}, ''res_file'': ''${dirs.output}seed${seed}_results.json'', ''uid'': ''Aug12-19:51-0684bafa'', ''seed'': 0, ''remove_dir'': False, ''pretrain'': {''seed'': 42, ''gpu'': 1, ''pretrain_datasets'': [''pubmed'', ''arxiv'', ''wikics'', ''amazon-ratings''], ''train_tasks'': [''pubmed_link'', ''pubmed_node'', ''arxiv'', ''wikics'', ''amazon-ratings''], ''eval_tasks'': [''cora_node''], ''use_original_mask'': False, ''pretrain_epochs'': 6000, ''k_shot'': 5, ''m_way'': 10, ''t_query'': 1, ''n_eqisodes'': 100, ''min_delta'': 0.001, ''patience'': 10000, ''log_every_n_steps'': 1, ''check_val_every_n_epoch'': 5, ''pretrain_tasks'': [''pubmed_link'', ''pubmed_node'', ''arxiv'', ''wikics'', ''amazon-ratings'']}, ''wandb'': {''project'': ''GAlign-Pretrain'', ''debug'': False}, ''logging'': {''level'': ''info'', ''enable_stdout_log'': True, ''log_wandb_metric_to_stdout'': False, ''prefix'': ''''}, ''preprocess_device'': ''gpu'', ''dataset'': ''Debug'', ''train_datasets'': ''${oc.select:_dataset_lookup.${dataset}.train,${dataset}}'', ''eval_datasets'': ''${oc.select:_dataset_lookup.${dataset}.eval,${dataset}}'', ''task_names'': [''cora_link'', ''cora_node'', ''pubmed_link'', ''pubmed_node'', ''arxiv'', ''WN18RR'', ''FB15K237'', ''wikics'', ''chemblpre'', ''chempcba'', ''chemhiv''], ''llm_name'': ''ST'', ''llm_b_size'': 1, ''batch_size'': 512, ''train_sample_size'': -1, ''_all_datasets'': [''cora'', ''pubmed'', ''arxiv'', ''wikics'', ''amazon-ratings''], ''_dataset_lookup'': {''Xcora'': {''eval'': [''cora''], ''train'': ''${_all_datasets}''}, ''Xpubmed'': {''eval'': [''pubmed''], ''train'': ''${_all_datasets}''}, ''Xarxiv'': {''eval'': [''arxiv''], ''train'': ''${_all_datasets}''}, ''Xwikics'': {''eval'': [''wikics''], ''train'': ''${_all_datasets}''}, ''XWN18RR'': {''eval'': [''WN18RR''], ''train'': ''${_all_datasets}''}, ''XFB15K237'': {''eval'': [''FB15K237''], ''train'': ''${_all_datasets}''}, ''Xchemhiv'': {''eval'': [''chemhiv''], ''train'': ''${_all_datasets}''}, ''Xchemblpre'': {''eval'': [''chemblpre''], ''train'': ''${_all_datasets}''}, ''Xchempcba'': {''eval'': [''chempcba''], ''train'': ''${_all_datasets}''}}, ''data_config'': {''E2E-node'': {''task_level'': ''e2e_node'', ''preprocess'': None, ''construct'': ''ConstructNodeCls'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max''}, ''arxiv'': {''task_level'': ''e2e_node'', ''preprocess'': None, ''construct'': ''ConstructNodeCls'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''arxiv'', ''dataset_splitter'': ''ArxivSplitter'', ''process_label_func'': ''process_pth_label'', ''num_classes'': 40}, ''logic_arxiv'': {''task_level'': ''logic_e2e'', ''preprocess'': None, ''construct'': ''ConstructNodeCls'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True}, ''eval_metric'': ''auc'', ''eval_func'': ''flat_auc'', ''eval_mode'': ''max'', ''dataset_name'': ''arxiv'', ''dataset_splitter'': ''ArxivSplitter'', ''process_label_func'': ''process_logic_label'', ''num_classes'': 40}, ''cora'': {''task_level'': ''e2e_node'', ''preprocess'': None, ''construct'': ''ConstructNodeCls'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''Cora'', ''dataset_splitter'': ''CiteSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 7}, ''logic_cora'': {''task_level'': ''logic_e2e'', ''preprocess'': None, ''construct'': ''ConstructNodeCls'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True}, ''eval_metric'': ''auc'', ''eval_func'': ''flat_auc'', ''eval_mode'': ''max'', ''dataset_name'': ''Cora'', ''dataset_splitter'': ''CiteSplitter'', ''process_label_func'': ''process_logic_label'', ''num_classes'': 7}, ''pubmed'': {''task_level'': ''e2e_node'', ''preprocess'': None, ''construct'': ''ConstructNodeCls'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''pubmed'', ''dataset_splitter'': ''CiteSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 3}, ''wikics'': {''task_level'': ''e2e_node'', ''preprocess'': None, ''construct'': ''ConstructNodeCls'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''wikics'', ''dataset_splitter'': ''WikiSplitter'', ''process_label_func'': ''process_pth_label'', ''num_classes'': 10}, ''amazon-ratings'': {''task_level'': ''e2e_node'', ''preprocess'': None, ''construct'': ''ConstructNodeCls'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''amazon-ratings'', ''dataset_splitter'': ''AmazonRatingsSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 5}, ''link-eval-args'': {''remove_edge'': False, ''walk_length'': None}, ''E2E-link'': {''task_level'': ''e2e_link'', ''args'': {''remove_edge'': True, ''walk_length'': None}}, ''E2E-link-cite'': {''task_level'': ''e2e_link'', ''args'': {''remove_edge'': True, ''walk_length'': None}, ''preprocess'': ''LinkConstructGraph'', ''construct'': ''ConstructLinkCls'', ''dataset_splitter'': ''CiteLinkSplitter'', ''process_label_func'': ''process_int_label'', ''eval_metric'': ''auc'', ''eval_func'': ''binary_auc_func'', ''num_classes'': 2, ''eval_mode'': ''max''}, ''cora_link'': {''task_level'': ''e2e_link'', ''args'': {''remove_edge'': True, ''walk_length'': None}, ''preprocess'': ''LinkConstructGraph'', ''construct'': ''ConstructLinkCls'', ''dataset_splitter'': ''CiteLinkSplitter'', ''process_label_func'': ''process_int_label'', ''eval_metric'': ''auc'', ''eval_func'': ''binary_auc_func'', ''num_classes'': 2, ''eval_mode'': ''max'', ''dataset_name'': ''Cora''}, ''cora_link_eval'': {''task_level'': ''e2e_link'', ''args'': {''remove_edge'': False, ''walk_length'': None}, ''preprocess'': ''LinkConstructGraph'', ''construct'': ''ConstructLinkCls'', ''dataset_splitter'': ''CiteLinkSplitter'', ''process_label_func'': ''process_int_label'', ''eval_metric'': ''auc'', ''eval_func'': ''binary_auc_func'', ''num_classes'': 2, ''eval_mode'': ''max'', ''dataset_name'': ''Cora''}, ''pubmed_link'': {''task_level'': ''e2e_link'', ''args'': {''remove_edge'': True, ''walk_length'': None}, ''preprocess'': ''LinkConstructGraph'', ''construct'': ''ConstructLinkCls'', ''dataset_splitter'': ''CiteLinkSplitter'', ''process_label_func'': ''process_int_label'', ''eval_metric'': ''auc'', ''eval_func'': ''binary_auc_func'', ''num_classes'': 2, ''eval_mode'': ''max'', ''dataset_name'': ''pubmed''}, ''pubmed_link_eval'': {''task_level'': ''e2e_link'', ''args'': {''remove_edge'': False, ''walk_length'': None}, ''preprocess'': ''LinkConstructGraph'', ''construct'': ''ConstructLinkCls'', ''dataset_splitter'': ''CiteLinkSplitter'', ''process_label_func'': ''process_int_label'', ''eval_metric'': ''auc'', ''eval_func'': ''binary_auc_func'', ''num_classes'': 2, ''eval_mode'': ''max'', ''dataset_name'': ''pubmed''}, ''E2E-link-KG'': {''task_level'': ''e2e_link'', ''args'': {''remove_edge'': True, ''walk_length'': None}, ''dataset_splitter'': ''KGSplitter'', ''preprocess'': ''KGConstructEdgeList'', ''construct'': ''ConstructKG'', ''process_label_func'': ''process_int_label'', ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max''}, ''WN18RR'': {''task_level'': ''e2e_link'', ''args'': {''remove_edge'': True, ''walk_length'': None}, ''dataset_splitter'': ''KGSplitter'', ''preprocess'': ''KGConstructEdgeList'', ''construct'': ''ConstructKG'', ''process_label_func'': ''process_int_label'', ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''WN18RR'', ''num_classes'': 11}, ''WN18RR_eval'': {''task_level'': ''e2e_link'', ''args'': {''remove_edge'': False, ''walk_length'': None}, ''dataset_splitter'': ''KGSplitter'', ''preprocess'': ''KGConstructEdgeList'', ''construct'': ''ConstructKG'', ''process_label_func'': ''process_int_label'', ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''WN18RR'', ''num_classes'': 11}, ''FB15K237'': {''task_level'': ''e2e_link'', ''args'': {''remove_edge'': True, ''walk_length'': None}, ''dataset_splitter'': ''KGSplitter'', ''preprocess'': ''KGConstructEdgeList'', ''construct'': ''ConstructKG'', ''process_label_func'': ''process_int_label'', ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''FB15K237'', ''num_classes'': 237}, ''FB15K237_eval'': {''task_level'': ''e2e_link'', ''args'': {''remove_edge'': False, ''walk_length'': None}, ''dataset_splitter'': ''KGSplitter'', ''preprocess'': ''KGConstructEdgeList'', ''construct'': ''ConstructKG'', ''process_label_func'': ''process_int_label'', ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''FB15K237'', ''num_classes'': 237}, ''E2E-graph'': {''task_level'': ''e2e_graph'', ''dataset_splitter'': ''MolSplitter'', ''preprocess'': None, ''construct'': ''ConstructMolCls'', ''args'': {''walk_length'': None}, ''eval_mode'': ''max''}, ''chemblpre'': {''task_level'': ''e2e_graph'', ''dataset_splitter'': ''MolSplitter'', ''preprocess'': None, ''construct'': ''ConstructMolCls'', ''args'': {''walk_length'': None}, ''eval_mode'': ''max'', ''dataset_name'': ''chemblpre'', ''process_label_func'': ''process_positive_negative_multi_label'', ''eval_metric'': ''apr'', ''eval_func'': ''binary_apr_func'', ''num_classes'': 1295}, ''chempcba'': {''task_level'': ''e2e_graph'', ''dataset_splitter'': ''MolSplitter'', ''preprocess'': None, ''construct'': ''ConstructMolCls'', ''args'': {''walk_length'': None}, ''eval_mode'': ''max'', ''dataset_name'': ''chempcba'', ''process_label_func'': ''process_positive_negative_multi_label'', ''eval_metric'': ''apr'', ''eval_func'': ''binary_apr_func'', ''num_classes'': 128}, ''chempcba_eval'': {''task_level'': ''e2e_graph'', ''dataset_splitter'': ''MolSplitter'', ''preprocess'': None, ''construct'': ''ConstructMolCls'', ''args'': {''walk_length'': None}, ''eval_mode'': ''max'', ''dataset_name'': ''chempcba'', ''process_label_func'': ''process_label_positive_only'', ''eval_metric'': ''apr'', ''eval_func'': ''binary_apr_func'', ''num_classes'': 128}, ''chemhiv'': {''task_level'': ''e2e_graph'', ''dataset_splitter'': ''MolSplitter'', ''preprocess'': None, ''construct'': ''ConstructMolCls'', ''args'': {''walk_length'': None}, ''eval_mode'': ''max'', ''dataset_name'': ''chemhiv'', ''process_label_func'': ''process_reverse_binary_label'', ''eval_metric'': ''auc'', ''eval_func'': ''binary_auc_func'', ''num_classes'': 2}, ''LR-node'': {''task_level'': ''lr_node'', ''construct'': ''ConstructFSTask'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max''}, ''arxiv_fs'': {''task_level'': ''lr_node'', ''construct'': ''ConstructFSTask'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 5, ''k_shot'': 5, ''min_k_shot'': 0, ''base_construct'': ''ConstructNodeCls'', ''no_class_node'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''arxiv'', ''dataset_splitter'': ''ArxivFSSplitter'', ''process_label_func'': ''process_pth_label'', ''num_classes'': 5}, ''arxiv_fs_51'': {''task_level'': ''lr_node'', ''construct'': ''ConstructFSTask'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 5, ''k_shot'': 1, ''base_construct'': ''ConstructNodeCls'', ''no_class_node'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''arxiv'', ''dataset_splitter'': ''ArxivFSSplitter'', ''process_label_func'': ''process_pth_label'', ''num_classes'': 5}, ''arxiv_fs_53'': {''task_level'': ''lr_node'', ''construct'': ''ConstructFSTask'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 5, ''k_shot'': 3, ''base_construct'': ''ConstructNodeCls'', ''no_class_node'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''arxiv'', ''dataset_splitter'': ''ArxivFSSplitter'', ''process_label_func'': ''process_pth_label'', ''num_classes'': 5}, ''arxiv_fs_55'': {''task_level'': ''lr_node'', ''construct'': ''ConstructFSTask'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 5, ''k_shot'': 5, ''base_construct'': ''ConstructNodeCls'', ''no_class_node'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''arxiv'', ''dataset_splitter'': ''ArxivFSSplitter'', ''process_label_func'': ''process_pth_label'', ''num_classes'': 5}, ''cora_fs'': {''task_level'': ''lr_node'', ''construct'': ''ConstructFSTask'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 2, ''k_shot'': 1, ''base_construct'': ''ConstructNodeCls'', ''no_class_node'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''cora'', ''dataset_splitter'': ''CiteFSSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 2}, ''cora_fs_21'': {''task_level'': ''lr_node'', ''construct'': ''ConstructFSTask'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 2, ''k_shot'': 1, ''base_construct'': ''ConstructNodeCls'', ''no_class_node'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''cora'', ''dataset_splitter'': ''CiteFSSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 2}, ''cora_fs_23'': {''task_level'': ''lr_node'', ''construct'': ''ConstructFSTask'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 2, ''k_shot'': 3, ''base_construct'': ''ConstructNodeCls'', ''no_class_node'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''cora'', ''dataset_splitter'': ''CiteFSSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 2}, ''cora_fs_25'': {''task_level'': ''lr_node'', ''construct'': ''ConstructFSTask'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 2, ''k_shot'': 5, ''base_construct'': ''ConstructNodeCls'', ''no_class_node'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''cora'', ''dataset_splitter'': ''CiteFSSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 2}, ''cora_fs_71'': {''task_level'': ''lr_node'', ''construct'': ''ConstructFSTask'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 7, ''k_shot'': 1, ''base_construct'': ''ConstructNodeCls'', ''no_class_node'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''cora'', ''dataset_splitter'': ''CiteFSSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 7}, ''cora_fs_73'': {''task_level'': ''lr_node'', ''construct'': ''ConstructFSTask'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 7, ''k_shot'': 3, ''base_construct'': ''ConstructNodeCls'', ''no_class_node'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''cora'', ''dataset_splitter'': ''CiteFSSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 7}, ''cora_fs_75'': {''task_level'': ''lr_node'', ''construct'': ''ConstructFSTask'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 7, ''k_shot'': 5, ''base_construct'': ''ConstructNodeCls'', ''no_class_node'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''cora'', ''dataset_splitter'': ''CiteFSSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 7}, ''LR-link'': {''task_level'': ''lr_link'', ''construct'': ''ConstructFSTask'', ''preprocess'': ''KGConstructEdgeList'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max''}, ''FB15K237_fs'': {''task_level'': ''lr_link'', ''construct'': ''ConstructFSTask'', ''preprocess'': ''KGConstructEdgeList'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 20, ''k_shot'': 5, ''min_k_shot'': 1, ''min_n_way'': 10, ''base_construct'': ''ConstructKG'', ''no_class_node'': True, ''remove_edge'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''FB15K237'', ''dataset_splitter'': ''KGFSTrainSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 20}, ''FB15K237_fs_101'': {''task_level'': ''lr_link'', ''construct'': ''ConstructFSTask'', ''preprocess'': ''KGConstructEdgeList'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 10, ''k_shot'': 1, ''base_construct'': ''ConstructKG'', ''no_class_node'': True, ''remove_edge'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''FB15K237'', ''dataset_splitter'': ''KGFSTrainSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 10}, ''FB15K237_fs_103'': {''task_level'': ''lr_link'', ''construct'': ''ConstructFSTask'', ''preprocess'': ''KGConstructEdgeList'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 10, ''k_shot'': 3, ''base_construct'': ''ConstructKG'', ''no_class_node'': True, ''remove_edge'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''FB15K237'', ''dataset_splitter'': ''KGFSTrainSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 10}, ''FB15K237_fs_105'': {''task_level'': ''lr_link'', ''construct'': ''ConstructFSTask'', ''preprocess'': ''KGConstructEdgeList'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 10, ''k_shot'': 5, ''base_construct'': ''ConstructKG'', ''no_class_node'': True, ''remove_edge'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''FB15K237'', ''dataset_splitter'': ''KGFSTrainSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 10}, ''FB15K237_fs_201'': {''task_level'': ''lr_link'', ''construct'': ''ConstructFSTask'', ''preprocess'': ''KGConstructEdgeList'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 20, ''k_shot'': 1, ''base_construct'': ''ConstructKG'', ''no_class_node'': True, ''remove_edge'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''FB15K237'', ''dataset_splitter'': ''KGFSTrainSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 20}, ''FB15K237_fs_203'': {''task_level'': ''lr_link'', ''construct'': ''ConstructFSTask'', ''preprocess'': ''KGConstructEdgeList'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 20, ''k_shot'': 3, ''base_construct'': ''ConstructKG'', ''no_class_node'': True, ''remove_edge'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''FB15K237'', ''dataset_splitter'': ''KGFSTrainSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 20}, ''FB15K237_fs_205'': {''task_level'': ''lr_link'', ''construct'': ''ConstructFSTask'', ''preprocess'': ''KGConstructEdgeList'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 20, ''k_shot'': 5, ''base_construct'': ''ConstructKG'', ''no_class_node'': True, ''remove_edge'': True}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''FB15K237'', ''dataset_splitter'': ''KGFSTrainSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 20}, ''WN18RR_fs'': {''task_level'': ''lr_link'', ''construct'': ''ConstructFSTask'', ''preprocess'': ''KGConstructEdgeList'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 5, ''k_shot'': 1, ''base_construct'': ''ConstructKG'', ''no_class_node'': True, ''remove_edge'': False}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''WN18RR'', ''dataset_splitter'': ''KGFSSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 5}, ''WN18RR_fs_51'': {''task_level'': ''lr_link'', ''construct'': ''ConstructFSTask'', ''preprocess'': ''KGConstructEdgeList'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 5, ''k_shot'': 1, ''base_construct'': ''ConstructKG'', ''no_class_node'': True, ''remove_edge'': False}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''WN18RR'', ''dataset_splitter'': ''KGFSSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 5}, ''WN18RR_fs_53'': {''task_level'': ''lr_link'', ''construct'': ''ConstructFSTask'', ''preprocess'': ''KGConstructEdgeList'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 5, ''k_shot'': 3, ''base_construct'': ''ConstructKG'', ''no_class_node'': True, ''remove_edge'': False}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''WN18RR'', ''dataset_splitter'': ''KGFSSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 5}, ''WN18RR_fs_55'': {''task_level'': ''lr_link'', ''construct'': ''ConstructFSTask'', ''preprocess'': ''KGConstructEdgeList'', ''args'': {''walk_length'': None, ''single_prompt_edge'': True, ''n_way'': 5, ''k_shot'': 5, ''base_construct'': ''ConstructKG'', ''no_class_node'': True, ''remove_edge'': False}, ''eval_metric'': ''acc'', ''eval_func'': ''classification_func'', ''eval_mode'': ''max'', ''dataset_name'': ''WN18RR'', ''dataset_splitter'': ''KGFSSplitter'', ''process_label_func'': ''process_int_label'', ''num_classes'': 5}}, ''_ds_meta_data'': {''cora'': ''pyg, Planetoid.Cora'', ''pubmed'': ''pyg, Planetoid.PubMed'', ''arxiv'': ''ofa, SingleTextGraph.arxiv'', ''wikics'': ''ofa, SingleTextGraph.WikiCS'', ''amazon-ratings'': ''pyg, HeterophilousGraphDataset.Amazon-ratings'', ''Cornell'': ''pyg, WebKB.cornell'', ''Texas'': ''heterophilous, texas_4_classes'', ''Wisconsin'': ''dgl, WisconsinDataset'', ''Chameleon'': ''pyg, WikipediaNetwork.chameleon'', ''Squirrel'': ''pyg, WikipediaNetwork.squirrel''}, ''model'': {''name'': ''G-Align''}, ''prev_ckpt'': None, ''unify_dim'': 64, ''Fingerprint'': {''hidden_dim'': 64, ''n_layers'': 2, ''conv_type'': ''SAGE'', ''add_self_loops'': True, ''n_layers_fingerprint'': 1, ''n_heads'': 8, ''use_bn'': False, ''probe_lr'': 0.01, ''fp_proj_dim'': 64, ''dropout'': 0.5, ''readout_proj'': True, ''task'': ''node_cls'', ''device'': None, ''require_grad_only'': True, ''compressed_dim'': 64, ''pca_whiten'': True, ''pca_svd_full'': False, ''l2_normalize'': True, ''random_state'': 42, ''loss_type'': ''ce'', ''DE_type'': ''conv'', ''contrast_loss'': {''probe_mask_ratio'': 0.3, ''probe_recon_weight'': 1.0, ''probe_neigh_weight'': 1.0, ''detach_embed'': True}, ''DE'': {''hidden_channels'': 32, ''num_conv_layers'': 2, ''kernel_size'': 3, ''padding'': 1, ''use_maxpool'': True, ''pool_size'': 2, ''pool_stride'': 2, ''adaptive_pool_size'': 4, ''mlp_hidden_dims'': [256, 128], ''mlp_dropout'': 0.2, ''train_epochs'': 300, ''train_lr'': 0.001, ''diversity_weight'': 0.1, ''padding_strategy'': ''zero'', ''padding_noise_std'': 0.01}}, ''FiLM'': {''hidden_dim'': 64, ''num_layers'': 2, ''aligned_feat_dim'': 64, ''dropout'': 0.5, ''layernorm'': False, ''softplus'': True}, ''PAMA'': {''d_attn'': 64, ''heads'': 1, ''dropout'': 0.5}, ''PTModel'': {''lr'': 0.01, ''weight_decay'': 0.0005}}'
+data_config:
+    value:
+        E2E-graph:
+            args:
+                walk_length: null
+            construct: ConstructMolCls
+            dataset_splitter: MolSplitter
+            eval_mode: max
+            preprocess: null
+            task_level: e2e_graph
+        E2E-link:
+            args:
+                remove_edge: true
+                walk_length: null
+            task_level: e2e_link
+        E2E-link-KG:
+            args:
+                remove_edge: true
+                walk_length: null
+            construct: ConstructKG
+            dataset_splitter: KGSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            preprocess: KGConstructEdgeList
+            process_label_func: process_int_label
+            task_level: e2e_link
+        E2E-link-cite:
+            args:
+                remove_edge: true
+                walk_length: null
+            construct: ConstructLinkCls
+            dataset_splitter: CiteLinkSplitter
+            eval_func: binary_auc_func
+            eval_metric: auc
+            eval_mode: max
+            num_classes: 2
+            preprocess: LinkConstructGraph
+            process_label_func: process_int_label
+            task_level: e2e_link
+        E2E-node:
+            args:
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructNodeCls
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            preprocess: null
+            task_level: e2e_node
+        FB15K237:
+            args:
+                remove_edge: true
+                walk_length: null
+            construct: ConstructKG
+            dataset_name: FB15K237
+            dataset_splitter: KGSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 237
+            preprocess: KGConstructEdgeList
+            process_label_func: process_int_label
+            task_level: e2e_link
+        FB15K237_eval:
+            args:
+                remove_edge: false
+                walk_length: null
+            construct: ConstructKG
+            dataset_name: FB15K237
+            dataset_splitter: KGSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 237
+            preprocess: KGConstructEdgeList
+            process_label_func: process_int_label
+            task_level: e2e_link
+        FB15K237_fs:
+            args:
+                base_construct: ConstructKG
+                k_shot: 5
+                min_k_shot: 1
+                min_n_way: 10
+                n_way: 20
+                no_class_node: true
+                remove_edge: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: FB15K237
+            dataset_splitter: KGFSTrainSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 20
+            preprocess: KGConstructEdgeList
+            process_label_func: process_int_label
+            task_level: lr_link
+        FB15K237_fs_101:
+            args:
+                base_construct: ConstructKG
+                k_shot: 1
+                n_way: 10
+                no_class_node: true
+                remove_edge: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: FB15K237
+            dataset_splitter: KGFSTrainSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 10
+            preprocess: KGConstructEdgeList
+            process_label_func: process_int_label
+            task_level: lr_link
+        FB15K237_fs_103:
+            args:
+                base_construct: ConstructKG
+                k_shot: 3
+                n_way: 10
+                no_class_node: true
+                remove_edge: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: FB15K237
+            dataset_splitter: KGFSTrainSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 10
+            preprocess: KGConstructEdgeList
+            process_label_func: process_int_label
+            task_level: lr_link
+        FB15K237_fs_105:
+            args:
+                base_construct: ConstructKG
+                k_shot: 5
+                n_way: 10
+                no_class_node: true
+                remove_edge: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: FB15K237
+            dataset_splitter: KGFSTrainSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 10
+            preprocess: KGConstructEdgeList
+            process_label_func: process_int_label
+            task_level: lr_link
+        FB15K237_fs_201:
+            args:
+                base_construct: ConstructKG
+                k_shot: 1
+                n_way: 20
+                no_class_node: true
+                remove_edge: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: FB15K237
+            dataset_splitter: KGFSTrainSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 20
+            preprocess: KGConstructEdgeList
+            process_label_func: process_int_label
+            task_level: lr_link
+        FB15K237_fs_203:
+            args:
+                base_construct: ConstructKG
+                k_shot: 3
+                n_way: 20
+                no_class_node: true
+                remove_edge: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: FB15K237
+            dataset_splitter: KGFSTrainSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 20
+            preprocess: KGConstructEdgeList
+            process_label_func: process_int_label
+            task_level: lr_link
+        FB15K237_fs_205:
+            args:
+                base_construct: ConstructKG
+                k_shot: 5
+                n_way: 20
+                no_class_node: true
+                remove_edge: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: FB15K237
+            dataset_splitter: KGFSTrainSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 20
+            preprocess: KGConstructEdgeList
+            process_label_func: process_int_label
+            task_level: lr_link
+        LR-link:
+            args:
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            preprocess: KGConstructEdgeList
+            task_level: lr_link
+        LR-node:
+            args:
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            task_level: lr_node
+        WN18RR:
+            args:
+                remove_edge: true
+                walk_length: null
+            construct: ConstructKG
+            dataset_name: WN18RR
+            dataset_splitter: KGSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 11
+            preprocess: KGConstructEdgeList
+            process_label_func: process_int_label
+            task_level: e2e_link
+        WN18RR_eval:
+            args:
+                remove_edge: false
+                walk_length: null
+            construct: ConstructKG
+            dataset_name: WN18RR
+            dataset_splitter: KGSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 11
+            preprocess: KGConstructEdgeList
+            process_label_func: process_int_label
+            task_level: e2e_link
+        WN18RR_fs:
+            args:
+                base_construct: ConstructKG
+                k_shot: 1
+                n_way: 5
+                no_class_node: true
+                remove_edge: false
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: WN18RR
+            dataset_splitter: KGFSSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 5
+            preprocess: KGConstructEdgeList
+            process_label_func: process_int_label
+            task_level: lr_link
+        WN18RR_fs_51:
+            args:
+                base_construct: ConstructKG
+                k_shot: 1
+                n_way: 5
+                no_class_node: true
+                remove_edge: false
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: WN18RR
+            dataset_splitter: KGFSSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 5
+            preprocess: KGConstructEdgeList
+            process_label_func: process_int_label
+            task_level: lr_link
+        WN18RR_fs_53:
+            args:
+                base_construct: ConstructKG
+                k_shot: 3
+                n_way: 5
+                no_class_node: true
+                remove_edge: false
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: WN18RR
+            dataset_splitter: KGFSSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 5
+            preprocess: KGConstructEdgeList
+            process_label_func: process_int_label
+            task_level: lr_link
+        WN18RR_fs_55:
+            args:
+                base_construct: ConstructKG
+                k_shot: 5
+                n_way: 5
+                no_class_node: true
+                remove_edge: false
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: WN18RR
+            dataset_splitter: KGFSSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 5
+            preprocess: KGConstructEdgeList
+            process_label_func: process_int_label
+            task_level: lr_link
+        amazon-ratings:
+            args:
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructNodeCls
+            dataset_name: amazon-ratings
+            dataset_splitter: AmazonRatingsSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 5
+            preprocess: null
+            process_label_func: process_int_label
+            task_level: e2e_node
+        arxiv:
+            args:
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructNodeCls
+            dataset_name: arxiv
+            dataset_splitter: ArxivSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 40
+            preprocess: null
+            process_label_func: process_pth_label
+            task_level: e2e_node
+        arxiv_fs:
+            args:
+                base_construct: ConstructNodeCls
+                k_shot: 5
+                min_k_shot: 0
+                n_way: 5
+                no_class_node: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: arxiv
+            dataset_splitter: ArxivFSSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 5
+            process_label_func: process_pth_label
+            task_level: lr_node
+        arxiv_fs_51:
+            args:
+                base_construct: ConstructNodeCls
+                k_shot: 1
+                n_way: 5
+                no_class_node: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: arxiv
+            dataset_splitter: ArxivFSSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 5
+            process_label_func: process_pth_label
+            task_level: lr_node
+        arxiv_fs_53:
+            args:
+                base_construct: ConstructNodeCls
+                k_shot: 3
+                n_way: 5
+                no_class_node: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: arxiv
+            dataset_splitter: ArxivFSSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 5
+            process_label_func: process_pth_label
+            task_level: lr_node
+        arxiv_fs_55:
+            args:
+                base_construct: ConstructNodeCls
+                k_shot: 5
+                n_way: 5
+                no_class_node: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: arxiv
+            dataset_splitter: ArxivFSSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 5
+            process_label_func: process_pth_label
+            task_level: lr_node
+        chemblpre:
+            args:
+                walk_length: null
+            construct: ConstructMolCls
+            dataset_name: chemblpre
+            dataset_splitter: MolSplitter
+            eval_func: binary_apr_func
+            eval_metric: apr
+            eval_mode: max
+            num_classes: 1295
+            preprocess: null
+            process_label_func: process_positive_negative_multi_label
+            task_level: e2e_graph
+        chemhiv:
+            args:
+                walk_length: null
+            construct: ConstructMolCls
+            dataset_name: chemhiv
+            dataset_splitter: MolSplitter
+            eval_func: binary_auc_func
+            eval_metric: auc
+            eval_mode: max
+            num_classes: 2
+            preprocess: null
+            process_label_func: process_reverse_binary_label
+            task_level: e2e_graph
+        chempcba:
+            args:
+                walk_length: null
+            construct: ConstructMolCls
+            dataset_name: chempcba
+            dataset_splitter: MolSplitter
+            eval_func: binary_apr_func
+            eval_metric: apr
+            eval_mode: max
+            num_classes: 128
+            preprocess: null
+            process_label_func: process_positive_negative_multi_label
+            task_level: e2e_graph
+        chempcba_eval:
+            args:
+                walk_length: null
+            construct: ConstructMolCls
+            dataset_name: chempcba
+            dataset_splitter: MolSplitter
+            eval_func: binary_apr_func
+            eval_metric: apr
+            eval_mode: max
+            num_classes: 128
+            preprocess: null
+            process_label_func: process_label_positive_only
+            task_level: e2e_graph
+        cora:
+            args:
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructNodeCls
+            dataset_name: Cora
+            dataset_splitter: CiteSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 7
+            preprocess: null
+            process_label_func: process_int_label
+            task_level: e2e_node
+        cora_fs:
+            args:
+                base_construct: ConstructNodeCls
+                k_shot: 1
+                n_way: 2
+                no_class_node: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: cora
+            dataset_splitter: CiteFSSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 2
+            process_label_func: process_int_label
+            task_level: lr_node
+        cora_fs_21:
+            args:
+                base_construct: ConstructNodeCls
+                k_shot: 1
+                n_way: 2
+                no_class_node: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: cora
+            dataset_splitter: CiteFSSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 2
+            process_label_func: process_int_label
+            task_level: lr_node
+        cora_fs_23:
+            args:
+                base_construct: ConstructNodeCls
+                k_shot: 3
+                n_way: 2
+                no_class_node: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: cora
+            dataset_splitter: CiteFSSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 2
+            process_label_func: process_int_label
+            task_level: lr_node
+        cora_fs_25:
+            args:
+                base_construct: ConstructNodeCls
+                k_shot: 5
+                n_way: 2
+                no_class_node: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: cora
+            dataset_splitter: CiteFSSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 2
+            process_label_func: process_int_label
+            task_level: lr_node
+        cora_fs_71:
+            args:
+                base_construct: ConstructNodeCls
+                k_shot: 1
+                n_way: 7
+                no_class_node: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: cora
+            dataset_splitter: CiteFSSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 7
+            process_label_func: process_int_label
+            task_level: lr_node
+        cora_fs_73:
+            args:
+                base_construct: ConstructNodeCls
+                k_shot: 3
+                n_way: 7
+                no_class_node: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: cora
+            dataset_splitter: CiteFSSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 7
+            process_label_func: process_int_label
+            task_level: lr_node
+        cora_fs_75:
+            args:
+                base_construct: ConstructNodeCls
+                k_shot: 5
+                n_way: 7
+                no_class_node: true
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructFSTask
+            dataset_name: cora
+            dataset_splitter: CiteFSSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 7
+            process_label_func: process_int_label
+            task_level: lr_node
+        cora_link:
+            args:
+                remove_edge: true
+                walk_length: null
+            construct: ConstructLinkCls
+            dataset_name: Cora
+            dataset_splitter: CiteLinkSplitter
+            eval_func: binary_auc_func
+            eval_metric: auc
+            eval_mode: max
+            num_classes: 2
+            preprocess: LinkConstructGraph
+            process_label_func: process_int_label
+            task_level: e2e_link
+        cora_link_eval:
+            args:
+                remove_edge: false
+                walk_length: null
+            construct: ConstructLinkCls
+            dataset_name: Cora
+            dataset_splitter: CiteLinkSplitter
+            eval_func: binary_auc_func
+            eval_metric: auc
+            eval_mode: max
+            num_classes: 2
+            preprocess: LinkConstructGraph
+            process_label_func: process_int_label
+            task_level: e2e_link
+        link-eval-args:
+            remove_edge: false
+            walk_length: null
+        logic_arxiv:
+            args:
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructNodeCls
+            dataset_name: arxiv
+            dataset_splitter: ArxivSplitter
+            eval_func: flat_auc
+            eval_metric: auc
+            eval_mode: max
+            num_classes: 40
+            preprocess: null
+            process_label_func: process_logic_label
+            task_level: logic_e2e
+        logic_cora:
+            args:
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructNodeCls
+            dataset_name: Cora
+            dataset_splitter: CiteSplitter
+            eval_func: flat_auc
+            eval_metric: auc
+            eval_mode: max
+            num_classes: 7
+            preprocess: null
+            process_label_func: process_logic_label
+            task_level: logic_e2e
+        pubmed:
+            args:
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructNodeCls
+            dataset_name: pubmed
+            dataset_splitter: CiteSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 3
+            preprocess: null
+            process_label_func: process_int_label
+            task_level: e2e_node
+        pubmed_link:
+            args:
+                remove_edge: true
+                walk_length: null
+            construct: ConstructLinkCls
+            dataset_name: pubmed
+            dataset_splitter: CiteLinkSplitter
+            eval_func: binary_auc_func
+            eval_metric: auc
+            eval_mode: max
+            num_classes: 2
+            preprocess: LinkConstructGraph
+            process_label_func: process_int_label
+            task_level: e2e_link
+        pubmed_link_eval:
+            args:
+                remove_edge: false
+                walk_length: null
+            construct: ConstructLinkCls
+            dataset_name: pubmed
+            dataset_splitter: CiteLinkSplitter
+            eval_func: binary_auc_func
+            eval_metric: auc
+            eval_mode: max
+            num_classes: 2
+            preprocess: LinkConstructGraph
+            process_label_func: process_int_label
+            task_level: e2e_link
+        wikics:
+            args:
+                single_prompt_edge: true
+                walk_length: null
+            construct: ConstructNodeCls
+            dataset_name: wikics
+            dataset_splitter: WikiSplitter
+            eval_func: classification_func
+            eval_metric: acc
+            eval_mode: max
+            num_classes: 10
+            preprocess: null
+            process_label_func: process_pth_label
+            task_level: e2e_node
+dataset:
+    value: Debug
+dirs:
+    value:
+        checkpoint_dir: /home/zhuowei/My_Proj/G-Align/generated_files/checkpoints/G-Align/Aug12-19:51-0684bafa/
+        data_storage: /home/zhuowei/My_Proj/G-Align/datasets/
+        fingerprint_storage: /home/zhuowei/My_Proj/G-Align/generated_files/fingerprint/
+        hydra: /home/zhuowei/My_Proj/G-Align/generated_files/temp/working_dir/Aug12-19:51-0684bafa/hydra/
+        output: /home/zhuowei/My_Proj/G-Align/generated_files/output/G-Align/Aug12-19:51-0684bafa/
+        temp: /home/zhuowei/My_Proj/G-Align/generated_files/temp/working_dir/Aug12-19:51-0684bafa/
+eval_datasets:
+    value: Debug
+llm_b_size:
+    value: 1
+llm_name:
+    value: ST
+logging:
+    value:
+        enable_stdout_log: true
+        level: info
+        log_wandb_metric_to_stdout: false
+        prefix: ""
+model:
+    value:
+        name: G-Align
+preprocess_device:
+    value: gpu
+pretrain:
+    value:
+        check_val_every_n_epoch: 5
+        eval_tasks:
+            - cora_node
+        gpu: 1
+        k_shot: 5
+        log_every_n_steps: 1
+        m_way: 10
+        min_delta: 0.001
+        n_eqisodes: 100
+        patience: 10000
+        pretrain_datasets:
+            - pubmed
+            - arxiv
+            - wikics
+            - amazon-ratings
+        pretrain_epochs: 6000
+        pretrain_tasks:
+            - pubmed_link
+            - pubmed_node
+            - arxiv
+            - wikics
+            - amazon-ratings
+        seed: 42
+        t_query: 1
+        train_tasks:
+            - pubmed_link
+            - pubmed_node
+            - arxiv
+            - wikics
+            - amazon-ratings
+        use_original_mask: false
+prev_ckpt:
+    value: null
+project_root:
+    value: /home/zhuowei/My_Proj/G-Align
+remove_dir:
+    value: false
+res_file:
+    value: /home/zhuowei/My_Proj/G-Align/generated_files/output/G-Align/Aug12-19:51-0684bafa/seed0_results.json
+seed:
+    value: 0
+task_names:
+    value:
+        - cora_link
+        - cora_node
+        - pubmed_link
+        - pubmed_node
+        - arxiv
+        - WN18RR
+        - FB15K237
+        - wikics
+        - chemblpre
+        - chempcba
+        - chemhiv
+train_datasets:
+    value: Debug
+train_sample_size:
+    value: -1
+uid:
+    value: Aug12-19:51-0684bafa
+unify_dim:
+    value: 64
+wandb:
+    value:
+        debug: false
+        project: GAlign-Pretrain

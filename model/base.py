@@ -115,6 +115,7 @@ class MySAGEConv(MessagePassing):
 
 
 class BackboneGNN(nn.Module):
+    '''for one layer backbone'''
     def __init__(self, in_dim, num_classes, cfg):
         super(BackboneGNN,self).__init__()
         fp_conf = cfg.Fingerprint
@@ -148,12 +149,8 @@ class BackboneGNN(nn.Module):
             self.proj = nn.Linear(self.hidden_dim, self.num_classes)
 
 
-    def encode(self, x, edge_index, edge_attr = None, batch = None, num_layers = None):
+    def encode(self, x, edge_index, edge_attr = None, batch = None):
         h = x
-
-        # layers_to_use = num_layers if num_layers is not None else self.n_layers
-        # layers_to_use = min(layers_to_use, self.n_layers)
-
         for l, (conv, bn) in enumerate(zip(self.gnns, self.bns)):
             if self.gnn_layer_name == 'MySAGE':
                 h = conv(h, edge_index, edge_attr)
@@ -166,7 +163,6 @@ class BackboneGNN(nn.Module):
                 h = F.dropout(h, p=self.dropout, training=self.training) 
         g = self.gmp(h, batch)
         return h, g
-
 
     def forward(self, data):
         x = data.x
@@ -181,6 +177,197 @@ class BackboneGNN(nn.Module):
             h = self.proj(h)
             return h, g
     
+
+
+
+class BackboneGNN2(nn.Module):
+    def __init__(self, in_dim, num_classes, cfg):
+        super(BackboneGNN2, self).__init__()
+        fp_conf = cfg.Fingerprint
+        self.n_layers = fp_conf.n_layers
+        self.hidden_dim = fp_conf.hidden_dim
+        self.dropout = fp_conf.dropout if hasattr(fp_conf, 'dropout') else 0.5
+        
+        self.gmp = global_mean_pool
+        self.gnns = nn.ModuleList()
+        self.readout_proj = fp_conf.readout_proj
+        
+        self.num_classes = num_classes
+        self.conv_type = fp_conf.conv_type
+        
+        # Build all layers
+        if self.n_layers == 1:
+            if not self.readout_proj:
+                self.hidden_dim = num_classes
+                dims = [in_dim] + [self.hidden_dim]
+            else:
+                dims = [in_dim] + [self.hidden_dim]
+        else:
+            if not self.readout_proj:
+                dims = [in_dim] + [self.hidden_dim] * (self.n_layers - 1) + [num_classes]
+            else:
+                dims = [in_dim] + [self.hidden_dim] * self.n_layers
+        
+        for d_in, d_out in zip(dims[:-1], dims[1:]):
+            self.gnns.append(make_conv(d_in, d_out, fp_conf.conv_type, 
+                                      add_self_loops=fp_conf.add_self_loops, 
+                                      heads=fp_conf.n_heads if hasattr(fp_conf, 'n_heads') else 1))
+        
+        self.bn = fp_conf.use_bn if hasattr(fp_conf, 'use_bn') else False
+        self.bns = nn.ModuleList([nn.BatchNorm1d(dims[i+1]) for i in range(len(dims)-1)])
+        
+        if self.readout_proj:
+            self.proj = nn.Linear(self.hidden_dim, self.num_classes)
+    
+    def encode(self, x, edge_index, edge_attr=None, batch=None, num_layers=None):
+        h = x
+        
+        # Use specified number of layers or all layers
+        layers_to_use = num_layers if num_layers is not None else self.n_layers
+        layers_to_use = min(layers_to_use, len(self.gnns))  # Can't use more layers than we have
+        
+        for l in range(layers_to_use):
+            conv = self.gnns[l]
+            bn = self.bns[l] if self.bn else None
+            
+            h = F.dropout(h, p=self.dropout, training=self.training)
+            h = conv(h, edge_index)
+            
+            if l != layers_to_use - 1:  # Not the last layer
+                if bn is not None:
+                    h = bn(h)
+                h = F.relu(h)
+        
+        g = self.gmp(h, batch) if batch is not None else h.mean(dim=0, keepdim=True)
+        
+        return h, g
+    
+    def forward(self, data, num_layers=None):
+
+        x = data.x
+        edge_index = data.edge_index
+        edge_attr = data.xe if hasattr(data, 'xe') else None
+        batch = data.batch if hasattr(data, 'batch') else None
+        
+        h, g = self.encode(x, edge_index, edge_attr, batch, num_layers)
+        
+        if self.readout_proj and num_layers == self.n_layers:
+            # Only apply projection if using all layers
+            h = F.relu(h)
+            h = self.proj(h)
+        
+        return h, g
+    
+    def forward_n_layers(self, data, n: int):
+        """
+        Convenience method to forward with exactly n layers.
+        
+        Args:
+            data: PyG Data object
+            n: Number of layers to use
+        """
+        return self.forward(data, num_layers=n)
+    
+    def get_submodel_state_dict(self, n_layers: int):
+        """
+        Get state dict for only the first n layers.
+        Useful for copying weights to a smaller model.
+        """
+        state_dict = {}
+        
+        # Copy GNN layers
+        for i in range(min(n_layers, len(self.gnns))):
+            for name, param in self.gnns[i].named_parameters():
+                state_dict[f'gnns.{i}.{name}'] = param.data.clone()
+        
+        # Copy batch norm layers if they exist
+        if self.bn:
+            for i in range(min(n_layers, len(self.bns))):
+                for name, param in self.bns[i].named_parameters():
+                    state_dict[f'bns.{i}.{name}'] = param.data.clone()
+                # Also copy running stats
+                state_dict[f'bns.{i}.running_mean'] = self.bns[i].running_mean.clone()
+                state_dict[f'bns.{i}.running_var'] = self.bns[i].running_var.clone()
+                state_dict[f'bns.{i}.num_batches_tracked'] = self.bns[i].num_batches_tracked.clone()
+        
+        return state_dict
+    
+    def load_partial_state_dict(self, state_dict, n_layers: int):
+        """
+        Load state dict for only the first n layers.
+        Useful for initializing from a model with different number of layers.
+        """
+        own_state = self.state_dict()
+        
+        for name, param in state_dict.items():
+            # Extract layer number from name
+            if name.startswith('gnns.') or name.startswith('bns.'):
+                parts = name.split('.')
+                layer_idx = int(parts[1])
+                
+                # Only load if within our layer range
+                if layer_idx < min(n_layers, self.n_layers):
+                    if name in own_state:
+                        own_state[name].copy_(param)
+        
+        # Load the updated state
+        self.load_state_dict(own_state)
+
+
+class FlexibleBackboneGNN(BackboneGNN2):
+    
+    def __init__(self, in_dim, num_classes, cfg, fingerprint_layers=1):
+
+        super().__init__(in_dim, num_classes, cfg)
+        self.fingerprint_layers = fingerprint_layers
+    
+    def forward_fingerprint(self, data):
+        """Forward pass using only the fingerprint layers."""
+        return self.forward(data, num_layers=self.fingerprint_layers)
+    
+    def create_fingerprint_copy(self):
+        """
+        Create a copy of this model that only has the fingerprint layers.
+        This is more memory efficient than keeping the full model.
+        """
+        # Create a new config for the smaller model
+        import copy
+        cfg_copy = copy.deepcopy(self._get_config())
+        cfg_copy.Fingerprint.n_layers = self.fingerprint_layers
+        
+        # Create the smaller model
+        smaller_model = BackboneGNN2(
+            in_dim=self.gnns[0].in_channels if hasattr(self.gnns[0], 'in_channels') else self.in_dim,
+            num_classes=self.num_classes,
+            cfg=cfg_copy
+        )
+        
+        # Copy weights from the first n layers
+        state_dict = self.get_submodel_state_dict(self.fingerprint_layers)
+        smaller_model.load_state_dict(state_dict, strict=False)
+        
+        return smaller_model
+    
+    def _get_config(self):
+        """Reconstruct a config object (you may need to adjust this based on your config structure)."""
+        class FakeConfig:
+            class Fingerprint:
+                pass
+        
+        cfg = FakeConfig()
+        cfg.Fingerprint = FakeConfig.Fingerprint()
+        cfg.Fingerprint.n_layers = self.n_layers
+        cfg.Fingerprint.hidden_dim = self.hidden_dim
+        cfg.Fingerprint.dropout = self.dropout
+        cfg.Fingerprint.conv_type = self.conv_type
+        cfg.Fingerprint.add_self_loops = True
+        cfg.Fingerprint.n_heads = 1
+        cfg.Fingerprint.use_bn = self.bn
+        cfg.Fingerprint.readout_proj = self.readout_proj
+        
+        return cfg
+
+
 
 class MLPLayer(nn.Module):
     def __init__(self, in_dim, out_dim, dropout, act = 'ReLU', layernorm = False):
@@ -197,3 +384,6 @@ class MLPLayer(nn.Module):
             x = self.act(x)
         x = F.dropout(x, p=self.dropout, training=self.training)
         return x
+
+
+

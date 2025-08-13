@@ -175,8 +175,8 @@ def span_node_and_edge_idx(dataset):
     # Define node index
     if dataset.data.x.ndim == 1:
         return dataset
-    
-    if dataset.ds_name in ['cora', 'pubmed']:
+
+    if dataset.ds_name in ['cora', 'pubmed', 'amazon-ratings']:
         # num_nodes = dataset.data.x.shape[0]
         dataset.data.xn = dataset.data.x
     elif dataset.ds_name in ['arxiv', 'wikics']:
@@ -187,7 +187,7 @@ def span_node_and_edge_idx(dataset):
     # dataset.data.x = torch.arange(num_nodes)
 
     # Define edge index
-    if dataset.ds_name in ['cora', 'pubmed']:
+    if dataset.ds_name in ['cora', 'pubmed', 'amazon-ratings']:
         num_edge_types = 1
     elif dataset.ds_name in ['arxiv', 'wikics']:
         num_edge_types = dataset.data.edge_text_feat.shape[0]  # 1个边类型

@@ -16,6 +16,7 @@ from abc import ABC
 import json
 import functools
 from torch_geometric.transforms import ToUndirected
+from torch_geometric.datasets import HeterophilousGraphDataset
 
 class SingleGraphDataset(InMemoryDataset, ABC):
     # for single graph for node/link task  cora and pubmed we use the provided encoded node features
@@ -34,7 +35,8 @@ class SingleGraphDataset(InMemoryDataset, ABC):
 
         # Planetoid.Cora -> [Planetoid, Cora]
         # SingleTextGraph.wikics -> [SingleTextGraph, wikics]
-        components = ds_alias.split(".")  
+        # HeterophilousGraphDataset.Amazon-ratings -> [HeterophilousGraphDataset, Amazon-ratings]
+        components = ds_alias.split(".") 
 
         if len(components) == 2:
             base_source, name = components
@@ -44,6 +46,7 @@ class SingleGraphDataset(InMemoryDataset, ABC):
         # save dataset in :
         # dastasets/pyg/Planetoid.Cora
         # datasets/ofa/SingleTextGraph.WikiCS
+        # datasets/pyg/HeterophilousGraphDataset.Amazon-ratings
         root = osp.join(cfg.dirs.data_storage, self.data_source, ds_alias)
         self.llm_encoder = llm_encoder
         self.load_text = load_text

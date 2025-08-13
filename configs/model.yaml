@@ -11,6 +11,7 @@ Fingerprint:
   n_layers: 1
   conv_type: 'SAGE'  # Encoder for fingerprint, can be GCN, GAT, SAGE, MySAGE, etc.
   add_self_loops: true  # for GCN
+  n_layers_fingerprint: 1
   n_heads: 8  # for GAT
   use_bn: false
   probe_lr: 1e-2
@@ -66,4 +67,4 @@ PAMA:
 
 PTModel:
   lr: 1e-2
-  weight_decay: 0.0005
+  weight_decay: 0.00005  # 0.0005

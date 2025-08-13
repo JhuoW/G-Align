@@ -555,12 +555,12 @@ class DomainEmbeddingExtractor:
 
         self.frozen_backbone.load_state_dict(self._theta0)
         self.frozen_backbone.to(self.device).train(False)
-        datat_new = data_new.to(self.device)
+        data_new = data_new.to(self.device)
         # single probe step on whole unseen graph
-        edge_index_new = datat_new.edge_index
-        x = datat_new.x
-        H, _ = self.frozen_backbone(datat_new)
-        y = datat_new.y
+        edge_index_new = data_new.edge_index
+        x = data_new.x
+        H, _ = self.frozen_backbone(data_new)
+        y = data_new.y
         if self.cfg.Fingerprint.loss_type == 'ce':
             loss = self.prob_loss(H, y)
         elif self.cfg.Fingerprint.loss_type == 'contrastive':

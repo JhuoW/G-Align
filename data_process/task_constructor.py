@@ -5,7 +5,7 @@ import os.path as osp
 from data_process.datahelper import SentenceEncoder
 
 name2dataset = {"arxiv": SingleGraphDataset, "cora": SingleGraphDataset, "pubmed": SingleGraphDataset,
-                 "wikics": SingleGraphDataset}
+                 "wikics": SingleGraphDataset, "amazon-ratings": SingleGraphDataset}
 
 
 class UnifiedTaskConstructor:
@@ -83,12 +83,12 @@ class UnifiedTaskConstructor:
             self.dataset[dataset_name] = name2dataset[dataset_name](cfg, 
                                                                     name = dataset_name, 
                                                                     llm_encoder = self.encoder, 
-                                                                    load_text = False if dataset_name in ["cora", "pubmed"] else True)
+                                                                    load_text = False if dataset_name in ["cora", "pubmed", "amazon-ratings"] else True)
         return self.dataset[dataset_name]
 
 def train_task_constructor(data_path, cfg, pretrain_tasks):
     llm_encoder = SentenceEncoder(cfg.llm_name, batch_size=cfg.llm_b_size)
-    # task_names =  ['cora_link', 'cora_node', 'pubmed_link', 'pubmed_node', 'arxiv', 'WN18RR', 'FB15K237', 'wikics', 'chemblpre', 'chempcba', 'chemhiv']
+    # task_names =  ['cora_link', 'cora_node', '_link', 'pubmed_node', 'arxiv', 'WN18RR', 'FB15K237', 'wikics', 'chemblpre', 'chempcba', 'chemhiv']
     # 现简化为task_names =  ['cora_link', 'cora_node', 'pubmed_link', 'pubmed_node', 'arxiv', 'wikics']
     if isinstance(pretrain_tasks, str):
         task_names = [a.strip() for a in pretrain_tasks.split(",")]

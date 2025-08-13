@@ -17,6 +17,7 @@ _all_datasets: [
   pubmed,
   arxiv,
   wikics,
+  amazon-ratings,
   # WN18RR,
   # FB15K237,
   # chemhiv,
@@ -116,6 +117,13 @@ data_config:
     dataset_splitter: WikiSplitter
     process_label_func: process_pth_label
     num_classes: 10
+
+  amazon-ratings: &amazon-ratings
+    <<: *E2E-node
+    dataset_name: amazon-ratings
+    dataset_splitter: AmazonRatingsSplitter
+    process_label_func: process_int_label
+    num_classes: 5
 
   link-eval-args: &link-eval-args
     remove_edge: False
@@ -529,7 +537,7 @@ _ds_meta_data:
   pubmed: pyg, Planetoid.PubMed
   arxiv: ofa, SingleTextGraph.arxiv
   wikics: ofa, SingleTextGraph.WikiCS
-
+  amazon-ratings: pyg, HeterophilousGraphDataset.Amazon-ratings
 
   # ! WebKB: nodes represent web pages, and edges are hyperlinks between them. Node features are the bag-of-words representation of web pages. The web pages are manually classified into the five categories, student, project, course, staff, and faculty.
   # Cornell: dgl, CornellDataset # 183 298 1,703 5
